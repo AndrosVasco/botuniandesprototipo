@@ -3,7 +3,7 @@ import cors from "cors";
 import express from "express";
 import { handleChat } from "./agent/agentController.js";
 import { resetSession } from "./memory/sessionStore.js";
-import type { Language } from "./types/domain.js";
+import type { Language, SimulationControls } from "./types/domain.js";
 const app = express();
 const port = Number(process.env.PORT ?? 3001);
 const corsOrigin = process.env.CORS_ORIGIN ?? "http://localhost:5173";
@@ -21,11 +21,16 @@ app.get("/", (_req, res) => {
 app.get("/api/health", (_req, res) => res.json({ ok: true, service: "asistente-aspirantes" }));
 app.post("/api/chat", async (req, res) => {
   try {
-    const { sessionId, message, mode, language } = req.body ?? {};
+    const { sessionId, message, mode, language, simulation } = req.body ?? {};
     if (!sessionId || typeof sessionId !== "string") return res.status(400).json({ error: "sessionId es requerido." });
     if (!message || typeof message !== "string") return res.status(400).json({ error: "message es requerido." });
     const safeLanguage: Language = language === "en" || language === "pt" ? language : "es";
-    res.json(await handleChat(sessionId, message.trim(), mode === "ai" ? "ai" : "demo", safeLanguage));
+    const safeSimulation: SimulationControls = {
+      advisorOnline: simulation?.advisorOnline !== false,
+      cohortOpen: simulation?.cohortOpen !== false,
+      aiError: simulation?.aiError === true
+    };
+    res.json(await handleChat(sessionId, message.trim(), mode === "ai" ? "ai" : "demo", safeLanguage, safeSimulation));
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "No fue posible procesar el mensaje. Inténtalo de nuevo." });

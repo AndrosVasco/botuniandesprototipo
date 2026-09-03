@@ -1,5 +1,6 @@
 export type Language = "es" | "en" | "pt";
 export type ContactChannel = "email" | "whatsapp" | "call";
+export interface SimulationControls { advisorOnline: boolean; cohortOpen: boolean; aiError: boolean; }
 
 export interface Program {
   id: string;

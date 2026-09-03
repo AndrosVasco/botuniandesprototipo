@@ -42,7 +42,7 @@ export function isOutOfScope(message: string) {
 
 export function isAdmissionsRelated(message: string) {
   const value = normalize(message);
-  return ["hola", "gracias", "programa", "carrera", "pregrado", "posgrado", "maestria", "especializacion", "doctorado", "admis", "cohorte", "turma", "requisito", "fecha", "costo", "cuesta", "valor", "beca", "financi", "inscrip", "matricul", "pago", "aspirante", "universidad", "uniandes", "sistemas", "diseno", "ingenieria", "derecho", "medicina", "economia", "arquitectura", "psicologia", "contact", "correo", "email", "whatsapp", "llamada", "autoriz", "confirm", "correg", "avisar", "interes", "simular falla", "try again", "intentar de nuevo"].some((term) => value.includes(term));
+  return ["hola", "gracias", "programa", "carrera", "pregrado", "posgrado", "maestria", "especializacion", "doctorado", "admis", "cohorte", "turma", "requisito", "fecha", "costo", "cuesta", "valor", "beca", "financi", "inscrip", "matricul", "pago", "aspirante", "universidad", "uniandes", "sistemas", "diseno", "ingenieria", "derecho", "medicina", "economia", "arquitectura", "psicologia", "contact", "correo", "email", "whatsapp", "llamada", "autoriz", "confirm", "correg", "avisar", "interes", "simular falla", "reintent", "try again", "intentar de nuevo"].some((term) => value.includes(term));
 }
 
 export function extractRequestedCareer(message: string) {

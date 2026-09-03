@@ -22,6 +22,14 @@ No incluye base de datos, autenticación, RAG, analítica, CRM, mensajería ni l
 - La matrícula genera solo un identificador `MATR-DEMO`; los enlaces de pago usan el dominio reservado `demo.invalid` y no ejecutan cobros.
 - Cualquier pregunta fuera del alcance se bloquea en backend antes de llamar a OpenAI.
 
+Al activar **IA**, la interfaz muestra tres controles de demostración:
+
+- Admisiones `Online / Offline`.
+- Cohorte `Disponible / No disponible`.
+- Conexión IA `Conectada / Simular error`.
+
+El error controlado no llama a OpenAI y ofrece reintentar, volver más tarde o usar el teléfono y correo ficticios de demostración. Al pulsar **Reintentar IA**, el frontend restablece la conexión simulada antes de enviar el nuevo intento.
+
 ## Ejecución
 
 Requiere Node.js 20 o superior.

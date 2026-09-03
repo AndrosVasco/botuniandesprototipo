@@ -1,4 +1,4 @@
-import type { ContactChannel, Language, SessionMemory } from "../types/domain.js";
+import type { ContactChannel, Language, SessionMemory, SimulationControls } from "../types/domain.js";
 import { sendInterestConfirmation } from "../email/retailEmails.js";
 import { createActions, createProgramCard, type MessageUi } from "./productUi.js";
 import { extractChannel, extractConsent, extractEmail, extractPhone, extractProgram, isOutOfScope } from "./messageParsing.js";
@@ -53,7 +53,7 @@ function resetContact(memory: SessionMemory) { memory.channel = null; memory.con
 function contactPrompt(language: Language, channel: ContactChannel) { return channel === "email" ? copy[language].askEmail : copy[language].askPhone; }
 function summary(memory: SessionMemory) { return `${copy[memory.language].confirm}\n\n**Canal:** ${channelLabel[memory.language][memory.channel!]}\n**Dato:** ${memory.contact}\n**Autorización:** Sí`; }
 
-export async function runFallbackAgent(message: string, memory: SessionMemory, mode: "demo" | "ai" = "demo"): Promise<Result> {
+export async function runFallbackAgent(message: string, memory: SessionMemory, mode: "demo" | "ai" = "demo", simulation?: SimulationControls): Promise<Result> {
   const language = memory.language;
   const t = copy[language];
   const lower = message.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
@@ -126,13 +126,23 @@ export async function runFallbackAgent(message: string, memory: SessionMemory, m
     return { reply: t.chooseChannel, toolUsed: null, ui: createActions(channelActions(language)) };
   }
   if (programId === "systems" || lower.includes("consultar un programa") || lower.includes("programa y sus fechas") || lower.includes("program and its dates") || lower.includes("programa e suas datas")) {
-    const program = tools.consultProgram("systems")!;
+    const program = { ...tools.consultProgram("systems")! };
+    if (mode === "ai" && simulation?.cohortOpen === false) {
+      program.cohortOpen = false; program.period = null; program.deadline = null; program.status = "Sin cohorte abierta (simulación controlada)";
+      memory.programId = "systems";
+      return { reply: "**Ingeniería de Sistemas** no tiene cohorte abierta en esta simulación y no hay una fecha futura confirmada. Puedes registrar interés por WhatsApp.", toolUsed: "checkCohort", ui: createActions([{ label: "Avisarme por WhatsApp", message: "Registrar interés por WhatsApp para Ingeniería de Sistemas", variant: "primary" }]) };
+    }
     memory.programId = "systems";
     const actions = language === "en" ? [{ label: "Register interest", message: "Register interest for Systems Engineering", variant: "primary" as const }, { label: "Talk to Admissions", message: "Talk to Admissions" }] : language === "pt" ? [{ label: "Registrar interesse", message: "Registrar interesse em Engenharia de Sistemas", variant: "primary" as const }, { label: "Falar com Admissões", message: "Falar com Admissões" }] : [{ label: "Registrar interés", message: "Registrar interés para Ingeniería de Sistemas", variant: "primary" as const }, { label: "Hablar con Admisiones", message: "Hablar con Admisiones" }];
     return { reply: language === "en" ? "I found this simulated program information." : language === "pt" ? "Encontrei estas informações simuladas do programa." : "Encontré esta información simulada del programa.", toolUsed: "consultProgram", ui: createProgramCard(program, actions) };
   }
   if (programId === "design" || lower.includes("cohorte disponible") || lower.includes("cohort available") || lower.includes("turma disponivel")) {
     memory.programId = "design";
+    if (mode === "ai" && simulation?.cohortOpen === true) {
+      const base = tools.consultProgram("design")!;
+      const program = { ...base, cohortOpen: true, period: "2027-1 (simulado)", deadline: "30 de noviembre de 2026 (simulada)", requirements: ["Formulario de inscripción simulado", "Documentos académicos simulados"], costCop: 24000000, status: "Cohorte simulada abierta" };
+      return { reply: "**Diseño** tiene cohorte abierta en esta simulación controlada.", toolUsed: "checkCohort", ui: createProgramCard(program, [{ label: "Registrar interés por WhatsApp", message: "Registrar interés por WhatsApp para Diseño", variant: "primary" }]) };
+    }
     const label = language === "en" ? "Notify me when it opens" : language === "pt" ? "Avisar quando abrir" : "Avisarme cuando se abra";
     return { reply: t.noCohort, toolUsed: "checkCohort", ui: createActions([{ label, message: label, variant: "primary" }]) };
   }
@@ -141,7 +151,7 @@ export async function runFallbackAgent(message: string, memory: SessionMemory, m
       memory.step = "choose_advisor_channel"; resetContact(memory);
       return { reply: t.chooseChannel, toolUsed: "checkAdvisorAvailability", ui: createActions(channelActions(language)) };
     }
-    if (mode === "demo") return { reply: t.closed, toolUsed: "checkAdvisorAvailability", ui: createActions([{ label: language === "en" ? "Leave contact request" : language === "pt" ? "Deixar solicitação" : "Dejar solicitud", message: language === "en" ? "Contact Admissions" : language === "pt" ? "Contatar Admissões" : "Contactar a Admisiones", variant: "primary" }]) };
+    if (mode === "demo" || simulation?.advisorOnline === false) return { reply: mode === "demo" ? t.closed : "Admisiones aparece **offline** en esta simulación. Puedes dejar una solicitud de contacto; no se promete un tiempo de respuesta.", toolUsed: "checkAdvisorAvailability", ui: createActions([{ label: language === "en" ? "Leave contact request" : language === "pt" ? "Deixar solicitação" : "Dejar solicitud", message: language === "en" ? "Contact Admissions" : language === "pt" ? "Contatar Admissões" : "Contactar a Admisiones", variant: "primary" }]) };
     memory.advisorMode = true;
     return { reply: language === "en" ? "You are now in the **simulated Admissions advisor** experience. I can clarify questions about programs, cohorts, requirements, costs, enrollment and simulated payments." : language === "pt" ? "Agora você está na experiência de **assessor simulado de Admissões**. Posso esclarecer dúvidas sobre programas, turmas, requisitos, custos, matrícula e pagamentos simulados." : "Ahora te atiendo como **asesor simulado de Admisiones**. Puedo aclarar dudas sobre programas, cohortes, requisitos, costos, matrícula y pagos simulados.", toolUsed: "checkAdvisorAvailability" };
   }
