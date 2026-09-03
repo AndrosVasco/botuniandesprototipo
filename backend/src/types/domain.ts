@@ -2,7 +2,7 @@ export type Language = "es" | "en" | "pt";
 export type ContactChannel = "email" | "whatsapp" | "call";
 
 export interface Program {
-  id: "systems" | "design" | "special";
+  id: string;
   name: string;
   cohortOpen: boolean | null;
   period: string | null;
@@ -15,7 +15,7 @@ export interface Program {
 
 export interface InterestRecord {
   id: string;
-  programId: Program["id"] | null;
+  programId: string | null;
   channel: ContactChannel;
   contact: string;
   consent: true;
@@ -42,7 +42,7 @@ export interface SessionMemory {
   internalChannel: "web";
   internalFlow: "aspirantes";
   step: ConversationStep;
-  programId: Program["id"] | null;
+  programId: string | null;
   channel: ContactChannel | null;
   contact: string | null;
   consent: boolean | null;
@@ -50,7 +50,9 @@ export interface SessionMemory {
   lastRecordId: string | null;
   historySummary: string;
   useLocalFallback: boolean;
+  advisorMode: boolean;
+  currentProgramName: string | null;
+  programConsultations: Record<string, number>;
 }
 
 export interface ChatMessage { role: "user" | "assistant"; content: string; }
-

@@ -25,6 +25,7 @@ const copy = {
     advisorTask: "Se creó una tarea demostrativa para Admisiones. No se realizó ninguna llamada y no se promete un tiempo de respuesta.",
     advisorDone: "Solicitud de contacto simulada registrada para Admisiones. No se promete un tiempo de respuesta.",
     transfer: "Admisiones aparece disponible en la simulación. Iniciando una **transferencia simulada**; no se ha contactado a una persona real.",
+    closed: "El equipo de Admisiones está cerrado en este momento. Horario simulado: **lunes a viernes, de 8:00 a. m. a 5:00 p. m.** Puedes dejar una solicitud de contacto.",
     failed: "No fue posible completar la acción simulada. No se registró nada. Puedes intentarlo de nuevo o contactar a Admisiones."
   },
   en: {
@@ -32,14 +33,14 @@ const copy = {
     welcome: "Hello. I can guide you with simulated information about programs, cohorts, and Admissions contact. What would you like to check?",
     unavailable: "I could not confirm that information. We can try again or contact Admissions.",
     noCohort: "**Design** has no open cohort and no confirmed future date. I will not invent a date. You may register your interest for a simulated notification.",
-    chooseChannel: "Choose a contact channel. I will only request the corresponding detail.", askEmail: "Enter the email address you want to register.", askPhone: "Enter the phone number you want to register.", invalid: "That detail is not in a valid format. Please review it and try again.", consent: "Do you authorize use of this detail solely for this simulated registration?", denied: "Nothing was registered because authorization was not granted.", confirm: "Review the summary before confirming:", interestDone: "Simulated interest registration confirmed. **This does not reserve a place.**", advisorTask: "A demonstration task was created for Admissions. No call was made and no response time is promised.", advisorDone: "Simulated contact request registered for Admissions. No response time is promised.", transfer: "Admissions appears available in the simulation. Starting a **simulated transfer**; no real person has been contacted.", failed: "The simulated action could not be completed. Nothing was registered. You can try again or contact Admissions."
+    chooseChannel: "Choose a contact channel. I will only request the corresponding detail.", askEmail: "Enter the email address you want to register.", askPhone: "Enter the phone number you want to register.", invalid: "That detail is not in a valid format. Please review it and try again.", consent: "Do you authorize use of this detail solely for this simulated registration?", denied: "Nothing was registered because authorization was not granted.", confirm: "Review the summary before confirming:", interestDone: "Simulated interest registration confirmed. **This does not reserve a place.**", advisorTask: "A demonstration task was created for Admissions. No call was made and no response time is promised.", advisorDone: "Simulated contact request registered for Admissions. No response time is promised.", transfer: "Admissions appears available in the simulation. Starting a **simulated transfer**; no real person has been contacted.", closed: "Admissions is currently closed. Simulated hours: **Monday through Friday, 8:00 a.m. to 5:00 p.m.** You may leave a contact request.", failed: "The simulated action could not be completed. Nothing was registered. You can try again or contact Admissions."
   },
   pt: {
     scope: "Este assistente orienta sobre programas e admissões. Não posso elaborar uma tese nem realizar tarefas fora deste serviço. Deseja consultar requisitos, datas ou custos?",
     welcome: "Olá. Posso orientar com informações simuladas sobre programas, turmas e contato com Admissões. O que deseja consultar?",
     unavailable: "Não consegui confirmar essa informação. Podemos tentar novamente ou consultar Admissões.",
     noCohort: "**Design** não tem turma aberta nem data futura confirmada. Não vou inventar uma data. Você pode registrar interesse para receber uma notificação simulada.",
-    chooseChannel: "Escolha um canal de contato. Pedirei somente o dado correspondente.", askEmail: "Digite o e-mail que deseja registrar.", askPhone: "Digite o telefone que deseja registrar.", invalid: "O dado não tem um formato válido. Revise e tente novamente.", consent: "Você autoriza o uso deste dado somente para este registro simulado?", denied: "Nenhum registro foi feito porque não houve autorização.", confirm: "Revise o resumo antes de confirmar:", interestDone: "Registro de interesse simulado confirmado. **Isso não reserva uma vaga.**", advisorTask: "Uma tarefa demonstrativa foi criada para Admissões. Nenhuma ligação foi realizada e não há promessa de prazo de resposta.", advisorDone: "Solicitação de contato simulada registrada para Admissões. Não há promessa de prazo de resposta.", transfer: "Admissões aparece disponível na simulação. Iniciando uma **transferência simulada**; nenhuma pessoa real foi contatada.", failed: "Não foi possível concluir a ação simulada. Nada foi registrado. Você pode tentar novamente ou contatar Admissões."
+    chooseChannel: "Escolha um canal de contato. Pedirei somente o dado correspondente.", askEmail: "Digite o e-mail que deseja registrar.", askPhone: "Digite o telefone que deseja registrar.", invalid: "O dado não tem um formato válido. Revise e tente novamente.", consent: "Você autoriza o uso deste dado somente para este registro simulado?", denied: "Nenhum registro foi feito porque não houve autorização.", confirm: "Revise o resumo antes de confirmar:", interestDone: "Registro de interesse simulado confirmado. **Isso não reserva uma vaga.**", advisorTask: "Uma tarefa demonstrativa foi criada para Admissões. Nenhuma ligação foi realizada e não há promessa de prazo de resposta.", advisorDone: "Solicitação de contato simulada registrada para Admissões. Não há promessa de prazo de resposta.", transfer: "Admissões aparece disponível na simulação. Iniciando uma **transferência simulada**; nenhuma pessoa real foi contatada.", closed: "Admissões está fechada neste momento. Horário simulado: **segunda a sexta, das 8h às 17h.** Você pode deixar uma solicitação de contato.", failed: "Não foi possível concluir a ação simulada. Nada foi registrado. Você pode tentar novamente ou contatar Admissões."
   }
 } as const;
 
@@ -52,7 +53,7 @@ function resetContact(memory: SessionMemory) { memory.channel = null; memory.con
 function contactPrompt(language: Language, channel: ContactChannel) { return channel === "email" ? copy[language].askEmail : copy[language].askPhone; }
 function summary(memory: SessionMemory) { return `${copy[memory.language].confirm}\n\n**Canal:** ${channelLabel[memory.language][memory.channel!]}\n**Dato:** ${memory.contact}\n**Autorización:** Sí`; }
 
-export async function runFallbackAgent(message: string, memory: SessionMemory): Promise<Result> {
+export async function runFallbackAgent(message: string, memory: SessionMemory, mode: "demo" | "ai" = "demo"): Promise<Result> {
   const language = memory.language;
   const t = copy[language];
   const lower = message.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
@@ -114,7 +115,14 @@ export async function runFallbackAgent(message: string, memory: SessionMemory): 
     return { reply: t.unavailable, toolUsed: "consultProgram", ui: createActions(unavailableActions(language)) };
   }
   if (lower.includes("avisar") || lower.includes("notify me") || lower.includes("registrar interes") || lower.includes("registrar interesse") || lower.includes("register interest")) {
-    memory.programId ??= "design"; memory.step = "choose_interest_channel"; resetContact(memory);
+    memory.programId ??= "design"; resetContact(memory);
+    const requestedChannel = extractChannel(message);
+    if (requestedChannel) {
+      memory.channel = requestedChannel;
+      memory.step = "await_interest_contact";
+      return { reply: contactPrompt(language, requestedChannel), toolUsed: null };
+    }
+    memory.step = "choose_interest_channel";
     return { reply: t.chooseChannel, toolUsed: null, ui: createActions(channelActions(language)) };
   }
   if (programId === "systems" || lower.includes("consultar un programa") || lower.includes("programa y sus fechas") || lower.includes("program and its dates") || lower.includes("programa e suas datas")) {
@@ -133,7 +141,9 @@ export async function runFallbackAgent(message: string, memory: SessionMemory): 
       memory.step = "choose_advisor_channel"; resetContact(memory);
       return { reply: t.chooseChannel, toolUsed: "checkAdvisorAvailability", ui: createActions(channelActions(language)) };
     }
-    return { reply: t.transfer, toolUsed: "checkAdvisorAvailability" };
+    if (mode === "demo") return { reply: t.closed, toolUsed: "checkAdvisorAvailability", ui: createActions([{ label: language === "en" ? "Leave contact request" : language === "pt" ? "Deixar solicitação" : "Dejar solicitud", message: language === "en" ? "Contact Admissions" : language === "pt" ? "Contatar Admissões" : "Contactar a Admisiones", variant: "primary" }]) };
+    memory.advisorMode = true;
+    return { reply: language === "en" ? "You are now in the **simulated Admissions advisor** experience. I can clarify questions about programs, cohorts, requirements, costs, enrollment and simulated payments." : language === "pt" ? "Agora você está na experiência de **assessor simulado de Admissões**. Posso esclarecer dúvidas sobre programas, turmas, requisitos, custos, matrícula e pagamentos simulados." : "Ahora te atiendo como **asesor simulado de Admisiones**. Puedo aclarar dudas sobre programas, cohortes, requisitos, costos, matrícula y pagos simulados.", toolUsed: "checkAdvisorAvailability" };
   }
   return { reply: t.welcome, toolUsed: null };
 }

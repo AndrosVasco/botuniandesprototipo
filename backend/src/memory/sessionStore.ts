@@ -4,7 +4,7 @@ const memories = new Map<string, SessionMemory>();
 const histories = new Map<string, ChatMessage[]>();
 
 export function createEmptyMemory(language: Language = "es"): SessionMemory {
-  return { language, internalChannel: "web", internalFlow: "aspirantes", step: "idle", programId: null, channel: null, contact: null, consent: null, correctionTarget: null, lastRecordId: null, historySummary: "", useLocalFallback: false };
+  return { language, internalChannel: "web", internalFlow: "aspirantes", step: "idle", programId: null, channel: null, contact: null, consent: null, correctionTarget: null, lastRecordId: null, historySummary: "", useLocalFallback: false, advisorMode: false, currentProgramName: null, programConsultations: {} };
 }
 export function getMemory(sessionId: string, language: Language = "es") {
   if (!memories.has(sessionId)) memories.set(sessionId, createEmptyMemory(language));
@@ -19,4 +19,3 @@ export function summarizeIntoMemory(sessionId: string) {
   if (memory) memory.historySummary = (histories.get(sessionId) ?? []).slice(-8).map((m) => `${m.role}: ${m.content}`).join(" | ").slice(-900);
 }
 export function resetSession(sessionId: string, language: Language = "es") { memories.set(sessionId, createEmptyMemory(language)); histories.delete(sessionId); }
-
