@@ -113,6 +113,10 @@ export async function runFallbackAgent(message: string, memory: SessionMemory): 
     memory.programId = "special";
     return { reply: t.unavailable, toolUsed: "consultProgram", ui: createActions(unavailableActions(language)) };
   }
+  if (lower.includes("avisar") || lower.includes("notify me") || lower.includes("registrar interes") || lower.includes("registrar interesse") || lower.includes("register interest")) {
+    memory.programId ??= "design"; memory.step = "choose_interest_channel"; resetContact(memory);
+    return { reply: t.chooseChannel, toolUsed: null, ui: createActions(channelActions(language)) };
+  }
   if (programId === "systems" || lower.includes("consultar un programa") || lower.includes("programa y sus fechas") || lower.includes("program and its dates") || lower.includes("programa e suas datas")) {
     const program = tools.consultProgram("systems")!;
     memory.programId = "systems";
@@ -123,10 +127,6 @@ export async function runFallbackAgent(message: string, memory: SessionMemory): 
     memory.programId = "design";
     const label = language === "en" ? "Notify me when it opens" : language === "pt" ? "Avisar quando abrir" : "Avisarme cuando se abra";
     return { reply: t.noCohort, toolUsed: "checkCohort", ui: createActions([{ label, message: label, variant: "primary" }]) };
-  }
-  if (lower.includes("avisar") || lower.includes("notify me") || lower.includes("registrar interes") || lower.includes("registrar interesse") || lower.includes("register interest")) {
-    memory.programId ??= "design"; memory.step = "choose_interest_channel"; resetContact(memory);
-    return { reply: t.chooseChannel, toolUsed: null, ui: createActions(channelActions(language)) };
   }
   if (lower.includes("admisiones") || lower.includes("admissions") || lower.includes("admissoes")) {
     if (lower.includes("contactar") || lower.includes("contact request") || lower.includes("no disponible")) {
