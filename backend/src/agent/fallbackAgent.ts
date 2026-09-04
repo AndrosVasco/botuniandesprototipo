@@ -155,5 +155,13 @@ export async function runFallbackAgent(message: string, memory: SessionMemory, m
     memory.advisorMode = true;
     return { reply: language === "en" ? "You are now in the **simulated Admissions advisor** experience. I can clarify questions about programs, cohorts, requirements, costs, enrollment and simulated payments." : language === "pt" ? "Agora você está na experiência de **assessor simulado de Admissões**. Posso esclarecer dúvidas sobre programas, turmas, requisitos, custos, matrícula e pagamentos simulados." : "Ahora te atiendo como **asesor simulado de Admisiones**. Puedo aclarar dudas sobre programas, cohortes, requisitos, costos, matrícula y pagos simulados.", toolUsed: "checkAdvisorAvailability" };
   }
+  if (mode === "demo") {
+    const reply = language === "en"
+      ? "That request is outside the current guided Demo flow. Use **Restart conversation** and choose one of the three quick options, or enable **AI mode** to ask conversational questions about programs and admissions."
+      : language === "pt"
+        ? "Essa solicitação está fora do fluxo guiado atual do modo Demo. Use **Reiniciar conversa** e escolha uma das três opções rápidas, ou ative o **modo IA** para fazer perguntas sobre programas e admissões."
+        : "Esta solicitud está fuera del recorrido guiado actual del modo Demo. Usa **Reiniciar conversación** y elige uno de los tres accesos rápidos, o activa el **modo IA** para consultar de forma conversacional sobre programas y admisiones.";
+    return { reply, toolUsed: null };
+  }
   return { reply: t.welcome, toolUsed: null };
 }
