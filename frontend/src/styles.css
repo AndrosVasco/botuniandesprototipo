@@ -57,10 +57,13 @@ button:disabled { cursor: not-allowed; opacity: .58; }
 .program-steps h4 { margin: 0 0 6px; color: #142f46; font-size: .82rem; }
 .program-steps ol { display: grid; gap: 4px; margin: 0; padding-left: 20px; color: #263238; font-size: .79rem; }
 .error { margin: 0 16px 12px; color: #a4493d; font-size: .88rem; }
-.composer { display: grid; grid-template-columns: 1fr 46px; gap: 10px; padding: 14px; border-top: 1px solid #dce5e8; background: #fff; }
+.composer { display: grid; grid-template-columns: 40px 1fr 46px; gap: 10px; padding: 14px; border-top: 1px solid #dce5e8; background: #fff; }
 .composer input { width: 100%; border: 1px solid #bdccd1; border-radius: 8px; padding: 11px 13px; outline: none; color: #263238; }
 .composer input:focus { border-color: #27746e; box-shadow: 0 0 0 3px rgba(39,116,110,.14); }
-.composer button { border: 0; border-radius: 8px; background: #d6aa35; color: #142f46; display: grid; place-items: center; }
+.composer button { border: 0; border-radius: 8px; display: grid; place-items: center; }
+.composer .send-button { background: #d6aa35; color: #142f46; }
+.composer .feedback-trigger { border: 1px solid #cbd9dd; background: #fff; color: #60727a; }
+.composer .feedback-trigger:hover { border-color: #27746e; color: #27746e; }
 .access-shell { min-height: 100vh; display: grid; place-items: center; padding: 24px; background: radial-gradient(circle at 12% 10%, rgba(39,116,110,.12), transparent 34%), #fafaf7; }
 .access-card { width: min(420px, 100%); padding: 30px; border: 1px solid #d8e1e3; border-radius: 14px; background: #fff; box-shadow: 0 22px 55px rgba(20,47,70,.14); }
 .access-icon { width: 48px; height: 48px; display: grid; place-items: center; margin-bottom: 18px; border-radius: 10px; background: #142f46; color: #fff; }
@@ -78,6 +81,11 @@ button:disabled { cursor: not-allowed; opacity: .58; }
 .unlock-card { width: min(390px, 100%); padding: 24px; border-radius: 12px; background: #fff; box-shadow: 0 20px 50px rgba(0,0,0,.25); }
 .unlock-card h2 { margin: 0; color: #142f46; font-size: 1.2rem; }
 .unlock-card input { border: 1px solid #bdccd1; border-radius: 8px; padding: 11px 12px; outline: none; }
+.unlock-card textarea { resize: vertical; min-height: 100px; border: 1px solid #bdccd1; border-radius: 8px; padding: 11px 12px; outline: none; font: inherit; }
+.unlock-card textarea:focus { border-color: #27746e; box-shadow: 0 0 0 3px rgba(39,116,110,.14); }
+.feedback-card { position: relative; }
+.dialog-close { position: absolute; top: 13px; right: 13px; display: grid; place-items: center; padding: 5px; border: 0; background: transparent; color: #60727a; }
+.feedback-status { padding: 9px 10px; border-radius: 7px; background: #e7f5ed; color: #23633d; font-size: .82rem; }
 .unlock-card input:focus { border-color: #27746e; box-shadow: 0 0 0 3px rgba(39,116,110,.14); }
 .unlock-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; }
 .unlock-actions button { border: 1px solid #bdccd1; border-radius: 8px; padding: 9px 12px; background: #fff; color: #263238; }

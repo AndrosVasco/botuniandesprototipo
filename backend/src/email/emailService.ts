@@ -48,3 +48,14 @@ export async function sendDemoEmail({ to, subject, title, body }: DemoEmailInput
 
   return { ok: true as const };
 }
+
+export function sendInternalFeedback(reference: string, sessionId: string, detail: string) {
+  const to = process.env.FEEDBACK_EMAIL;
+  if (!to) return Promise.resolve({ ok: false as const, reason: "feedback_email_not_configured" });
+  return sendDemoEmail({
+    to,
+    subject: `Comentario del asistente ${reference}`,
+    title: "Oportunidad de mejora reportada",
+    body: `Referencia: ${reference}\nSesión: ${sessionId}\n\n${detail}`
+  });
+}

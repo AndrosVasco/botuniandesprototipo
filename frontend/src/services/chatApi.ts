@@ -3,6 +3,7 @@ export type ChatMode = "demo" | "ai";
 export interface SimulationControls { advisorOnline: boolean; cohortOpen: boolean; aiError: boolean; }
 export interface AccessSession { token: string; expiresAt: number; }
 export interface ChatResponse { reply: string; memory: Record<string, unknown>; toolUsed: string | null; ui?: MessageUi; }
+export interface FeedbackResponse { ok: true; reference: string; delivered: boolean; }
 const API_URL = import.meta.env.VITE_API_URL ?? (import.meta.env.DEV ? "http://localhost:3001" : "");
 
 export class AccessExpiredError extends Error {}
@@ -20,4 +21,7 @@ export function sendChatMessage(sessionId: string, message: string, mode: ChatMo
 }
 export async function resetChatSession(sessionId: string, language: Language, token: string) {
   await request("/api/session/reset", { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, body: JSON.stringify({ sessionId, language }) }).catch(() => undefined);
+}
+export function sendFeedback(sessionId: string, detail: string, token: string): Promise<FeedbackResponse> {
+  return request("/api/feedback", { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, body: JSON.stringify({ sessionId, detail }) });
 }

@@ -1,6 +1,6 @@
 import { FormEvent, useEffect, useRef, useState } from "react";
-import { GraduationCap, RotateCcw, Send, Sparkles } from "lucide-react";
-import { AccessExpiredError, resetChatSession, sendChatMessage, unlockAi, type AccessSession, type ChatMode, type SimulationControls } from "../services/chatApi";
+import { GraduationCap, MessageCircle, RotateCcw, Send, Sparkles, X } from "lucide-react";
+import { AccessExpiredError, resetChatSession, sendChatMessage, sendFeedback, unlockAi, type AccessSession, type ChatMode, type SimulationControls } from "../services/chatApi";
 import { MessageBubble } from "./MessageBubble";
 import type { ChatMessage, Language } from "./types";
 
@@ -27,6 +27,11 @@ export function ChatWidget({ access, onAccessChange, onExpired }: { access: Acce
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [feedback, setFeedback] = useState("");
+  const [feedbackStatus, setFeedbackStatus] = useState("");
+  const [sendingFeedback, setSendingFeedback] = useState(false);
+  const lastAttemptRef = useRef("");
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const t = content[language];
 
@@ -34,9 +39,16 @@ export function ChatWidget({ access, onAccessChange, onExpired }: { access: Acce
 
   async function submit(text = input, override: Partial<SimulationControls> = {}) {
     if (text === "__open_enrollment_form__") { window.location.assign("/formulario-inscripcion"); return; }
+    if (text === "__feedback__") { setFeedbackStatus(""); setShowFeedback(true); return; }
+    if (text === "__alt_contacts__") {
+      setMessages((current) => [...current, { id: crypto.randomUUID(), role: "assistant", content: language === "en" ? "Alternative demo channels:\n\nPhone: **+57 601 555 0100**\nEmail: **admisiones@demo.invalid**\nHours: Monday to Friday, 8:00 a.m. to 5:00 p.m." : language === "pt" ? "Canais alternativos de demonstração:\n\nTelefone: **+57 601 555 0100**\nE-mail: **admisiones@demo.invalid**\nHorário: segunda a sexta, das 8h às 17h." : "Canales alternos de demostración:\n\nTeléfono: **+57 601 555 0100**\nCorreo: **admisiones@demo.invalid**\nHorario: lunes a viernes, de 8:00 a. m. a 5:00 p. m.", ui: { type: "actions", actions: [{ label: language === "en" ? "Request an advisor" : language === "pt" ? "Solicitar assessor" : "Solicitar un asesor", message: language === "en" ? "Contact Admissions" : language === "pt" ? "Contatar Admissões" : "Contactar a Admisiones", variant: "primary" }] } }]);
+      return;
+    }
+    if (text === "__retry_last__") text = lastAttemptRef.current || t.prompts[0];
     const retry = text === "__retry_ai__";
     const clean = retry ? t.retry : text.trim();
     if (!clean || isLoading) return;
+    lastAttemptRef.current = clean;
     if (retry) setAiError(false);
     const simulation: SimulationControls = { advisorOnline, cohortOpen, aiError, ...override, ...(retry ? { aiError: false } : {}) };
     setMessages((current) => [...current, { id: crypto.randomUUID(), role: "user", content: clean }]);
@@ -45,10 +57,17 @@ export function ChatWidget({ access, onAccessChange, onExpired }: { access: Acce
       const history = messages.slice(-10).map(({ role, content }) => ({ role, content }));
       const response = await sendChatMessage(sessionId, clean, mode, language, simulation, access.token, conversationContext, history);
       setConversationContext(response.memory);
-      setMessages((current) => [...current, { id: crypto.randomUUID(), role: "assistant", content: response.reply, toolUsed: response.toolUsed, ui: response.ui }]);
+      setMessages((current) => {
+        const previousUser = [...current].reverse().find((item) => item.role === "user");
+        const previousAssistant = [...current].reverse().find((item) => item.role === "assistant");
+        const normalize = (value: string) => value.trim().toLocaleLowerCase().replace(/\s+/g, " ");
+        const loopDetected = previousUser && previousAssistant && normalize(previousUser.content) === normalize(clean) && normalize(previousAssistant.content) === normalize(response.reply);
+        if (loopDetected) return [...current, recoveryMessage(language, true)];
+        return [...current, { id: crypto.randomUUID(), role: "assistant", content: response.reply, toolUsed: response.toolUsed, ui: response.ui }];
+      });
     } catch (reason) {
       if (reason instanceof AccessExpiredError) { onExpired(); return; }
-      setError(language === "en" ? "The assistant is unavailable. Please try again." : language === "pt" ? "O assistente não está disponível. Tente novamente." : "El asistente no está disponible. Inténtalo de nuevo.");
+      setMessages((current) => [...current, recoveryMessage(language, false)]);
     } finally { setIsLoading(false); }
   }
 
@@ -58,9 +77,20 @@ export function ChatWidget({ access, onAccessChange, onExpired }: { access: Acce
   function selectAiMode() { if (aiEnabled) setMode("ai"); else { setAiUnlockError(""); setAiCode(""); setShowAiUnlock(true); } }
   async function authorizeAi(event: FormEvent) {
     event.preventDefault(); setUnlockingAi(true); setAiUnlockError("");
-    try { const next = await unlockAi(aiCode, access.token); onAccessChange(next); setAiEnabled(true); setMode("ai"); setShowAiUnlock(false); setAiCode(""); }
+    try { const next = await unlockAi(aiCode, access.token); onAccessChange(next); setAiEnabled(true); setMode("ai"); setShowAiUnlock(false); setAiCode(""); setMessages((current) => [...current, predictiveMessage(language)]); }
     catch (reason) { if (reason instanceof AccessExpiredError) onExpired(); else setAiUnlockError(reason instanceof Error ? reason.message : "No fue posible habilitar IA."); }
     finally { setUnlockingAi(false); }
+  }
+  async function submitFeedback(event: FormEvent) {
+    event.preventDefault(); setSendingFeedback(true); setFeedbackStatus("");
+    try {
+      const result = await sendFeedback(sessionId, feedback, access.token);
+      setFeedbackStatus(language === "en" ? `Thank you. We received your comment (${result.reference}).` : language === "pt" ? `Obrigado. Recebemos seu comentário (${result.reference}).` : `Gracias. Recibimos tu comentario (${result.reference}).`);
+      setFeedback("");
+    } catch (reason) {
+      if (reason instanceof AccessExpiredError) onExpired();
+      else setFeedbackStatus(language === "en" ? "We could not send it. Please try again." : language === "pt" ? "Não foi possível enviar. Tente novamente." : "No pudimos enviarlo. Inténtalo nuevamente.");
+    } finally { setSendingFeedback(false); }
   }
 
   return (
@@ -82,10 +112,21 @@ export function ChatWidget({ access, onAccessChange, onExpired }: { access: Acce
       <div className="toolbar"><div className="quick-prompts" aria-label="Escenarios demo">{t.prompts.map((prompt) => <button key={prompt} type="button" onClick={() => void submit(prompt)} disabled={isLoading}><Sparkles size={14} />{prompt}</button>)}</div><button className="reset-button" type="button" onClick={() => void reset()} disabled={isLoading} title={t.reset}><RotateCcw size={16} /><span>{t.reset}</span></button></div>
       <div className="messages" role="log" aria-live="polite">{messages.map((message) => <MessageBubble key={message.id} message={message} language={language} onAction={(value) => void submit(value)} />)}{isLoading && <div className="typing">{t.loading}</div>}<div ref={messagesEndRef} aria-hidden="true" /></div>
       {error && <div className="error">{error}</div>}
-      <form className="composer" onSubmit={onSubmit}><input value={input} onChange={(event) => setInput(event.target.value)} placeholder={t.placeholder} aria-label={t.placeholder} /><button type="submit" disabled={isLoading || !input.trim()} aria-label="Enviar"><Send size={18} /></button></form>
+      <form className="composer" onSubmit={onSubmit}><button className="feedback-trigger" type="button" onClick={() => { setFeedbackStatus(""); setShowFeedback(true); }} title="Ayúdanos a mejorar" aria-label="Ayúdanos a mejorar"><MessageCircle size={17} /></button><input value={input} onChange={(event) => setInput(event.target.value)} placeholder={t.placeholder} aria-label={t.placeholder} /><button className="send-button" type="submit" disabled={isLoading || !input.trim()} aria-label="Enviar"><Send size={18} /></button></form>
       {showAiUnlock && <div className="unlock-overlay" role="dialog" aria-modal="true" aria-labelledby="ai-unlock-title"><form className="unlock-card" onSubmit={authorizeAi}><h2 id="ai-unlock-title">Habilitar modo IA</h2><p>Ingresa el código adicional para utilizar la inteligencia artificial durante esta sesión.</p><label htmlFor="ai-code">Código de IA</label><input id="ai-code" type="password" value={aiCode} onChange={(event) => setAiCode(event.target.value)} autoComplete="off" required autoFocus />{aiUnlockError && <div className="access-error">{aiUnlockError}</div>}<div className="unlock-actions"><button type="button" onClick={() => setShowAiUnlock(false)}>Cancelar</button><button className="primary" type="submit" disabled={unlockingAi || aiCode.length < 8}>{unlockingAi ? "Validando..." : "Habilitar IA"}</button></div></form></div>}
+      {showFeedback && <div className="unlock-overlay" role="dialog" aria-modal="true" aria-labelledby="feedback-title"><form className="unlock-card feedback-card" onSubmit={submitFeedback}><button className="dialog-close" type="button" onClick={() => setShowFeedback(false)} aria-label="Cerrar"><X size={18} /></button><h2 id="feedback-title">Ayúdanos a mejorar</h2><p>Cuéntanos brevemente qué ocurrió. Enviaremos tu comentario al equipo; no incluyas datos sensibles.</p><label htmlFor="feedback-detail">Tu comentario</label><textarea id="feedback-detail" value={feedback} onChange={(event) => setFeedback(event.target.value)} maxLength={2000} rows={4} required autoFocus />{feedbackStatus && <div className="feedback-status" role="status">{feedbackStatus}</div>}<div className="unlock-actions"><button type="button" onClick={() => setShowFeedback(false)}>Cerrar</button><button className="primary" type="submit" disabled={sendingFeedback || feedback.trim().length < 3}>{sendingFeedback ? "Enviando..." : "Enviar comentario"}</button></div></form></div>}
     </section></main>
   );
+}
+
+function recoveryMessage(language: Language, loop: boolean): ChatMessage {
+  const content = language === "en" ? `Sorry, ${loop ? "it looks like I repeated myself" : "I couldn't complete that request"}. We can try once more or continue through an alternative channel.` : language === "pt" ? `Desculpe, ${loop ? "parece que repeti a mesma resposta" : "não consegui concluir a solicitação"}. Podemos tentar mais uma vez ou continuar por outro canal.` : `Lo siento, ${loop ? "parece que repetí la misma respuesta" : "no pude completar la solicitud"}. Podemos intentarlo una vez más o continuar por otro canal.`;
+  return { id: crypto.randomUUID(), role: "assistant", content, ui: { type: "actions", actions: [{ label: language === "en" ? "Try once more" : language === "pt" ? "Tentar mais uma vez" : "Intentar una vez más", message: "__retry_last__", variant: "primary" }, { label: language === "en" ? "Other channels" : language === "pt" ? "Outros canais" : "Otros canales", message: "__alt_contacts__" }, { label: language === "en" ? "Help us improve" : language === "pt" ? "Ajude-nos a melhorar" : "Ayúdanos a mejorar", message: "__feedback__" }] } };
+}
+
+function predictiveMessage(language: Language): ChatMessage {
+  const content = language === "en" ? "**A possible next step**\n\nOur prototype's predictive model found simulated prior activity in which you searched for information about **Medicine**. Shall we make one last effort? I can connect you with an Admissions advisor." : language === "pt" ? "**Um possível próximo passo**\n\nO modelo preditivo do protótipo encontrou atividade anterior simulada em que você buscou informações sobre **Medicina**. Vamos fazer uma última tentativa? Posso encaminhar você a um assessor de Admissões." : "**Un posible siguiente paso**\n\nEl modelo predictivo del prototipo encontró actividad anterior simulada en la que buscaste información sobre **Medicina**. ¿Hacemos un último esfuerzo? Puedo conectarte con un asesor de Admisiones.";
+  return { id: crypto.randomUUID(), role: "assistant", content, ui: { type: "actions", actions: [{ label: language === "en" ? "Contact an advisor" : language === "pt" ? "Contatar um assessor" : "Contactar a un asesor", message: language === "en" ? "Contact Admissions about Medicine" : language === "pt" ? "Contatar Admissões sobre Medicina" : "Contactar a Admisiones sobre Medicina", variant: "primary" }, { label: language === "en" ? "View Medicine" : language === "pt" ? "Ver Medicina" : "Ver Medicina", message: language === "en" ? "Medicine" : "Medicina" }] } };
 }
 
 function Control({ label, active, activeLabel, inactiveLabel, onChange, disabled, danger = false }: { label: string; active: boolean; activeLabel: string; inactiveLabel: string; onChange: (value: boolean) => void; disabled: boolean; danger?: boolean }) {

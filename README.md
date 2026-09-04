@@ -31,6 +31,10 @@ Al activar **IA**, la interfaz muestra tres controles de demostración:
 
 El error controlado no llama a OpenAI y ofrece reintentar, volver más tarde o usar el teléfono y correo ficticios de demostración. Al pulsar **Reintentar IA**, el frontend restablece la conexión simulada antes de enviar el nuevo intento.
 
+La interfaz también detecta una respuesta consecutiva repetida ante la misma solicitud. En ese caso interrumpe el ciclo, ofrece un nuevo intento, muestra canales alternos ficticios y permite enviar un comentario mediante **Ayúdanos a mejorar**. Los comentarios se remiten a `FEEDBACK_EMAIL` cuando SMTP está configurado; sin esa variable, el endpoint conserva el comportamiento de demostración y devuelve una referencia sin afirmar entrega real.
+
+Al habilitar IA aparece una recomendación predictiva expresamente identificada como parte del prototipo, basada en actividad anterior simulada sobre Medicina, con opciones para consultar el programa o contactar a un asesor.
+
 ## Ejecución
 
 Requiere Node.js 20 o superior.
