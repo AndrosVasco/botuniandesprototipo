@@ -67,6 +67,8 @@ SMTP es opcional. Sin SMTP, el registro por correo finaliza correctamente como s
 
 `Quiero hablar con Admisiones.` demuestra la disponibilidad y transferencia simuladas. `Genera una tesis.` valida el límite de alcance en backend antes de ejecutar herramientas o llamar a OpenAI. `Simular falla` permite comprobar el manejo seguro de una acción fallida.
 
+Las tarjetas con cohorte disponible incluyen requisitos y tres secuencias demostrativas: postulación, registro/matrícula e inicio de estudios. Ningún paso crea una inscripción, matrícula o pago real.
+
 ## Scripts
 
 ```powershell

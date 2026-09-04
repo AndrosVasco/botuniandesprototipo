@@ -9,6 +9,9 @@ export interface Program {
   period: string | null;
   deadline: string | null;
   requirements: string[] | null;
+  applicationSteps: string[] | null;
+  enrollmentSteps: string[] | null;
+  studyStartSteps: string[] | null;
   costCop: number | null;
   source: string;
   status: string;
