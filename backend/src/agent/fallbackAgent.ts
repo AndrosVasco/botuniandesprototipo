@@ -113,6 +113,7 @@ export async function runFallbackAgent(message: string, memory: SessionMemory, m
   const programId = extractProgram(message);
   if (programId === "special" || lower.includes("intentar de nuevo") || lower.includes("try again") || lower.includes("tentar novamente")) {
     memory.programId = "special";
+    memory.currentProgramName = language === "en" ? "Special Program" : "Programa Especial";
     return { reply: t.unavailable, toolUsed: "consultProgram", ui: createActions(unavailableActions(language)) };
   }
   if (lower.includes("avisar") || lower.includes("notify me") || lower.includes("registrar interes") || lower.includes("registrar interesse") || lower.includes("register interest")) {
@@ -131,16 +132,19 @@ export async function runFallbackAgent(message: string, memory: SessionMemory, m
     if (mode === "ai" && simulation?.cohortOpen === false) {
       program.cohortOpen = false; program.period = null; program.deadline = null; program.status = "Sin cohorte abierta (simulación controlada)";
       memory.programId = "systems";
+      memory.currentProgramName = language === "en" ? "Systems Engineering" : language === "pt" ? "Engenharia de Sistemas" : "Ingeniería de Sistemas";
       const reply = language === "en" ? "**Systems Engineering** has no available cohort in this simulation and no confirmed future date. You may register interest via WhatsApp." : language === "pt" ? "**Engenharia de Sistemas** não tem turma disponível nesta simulação nem data futura confirmada. Você pode registrar interesse por WhatsApp." : "**Ingeniería de Sistemas** no tiene cohorte abierta en esta simulación y no hay una fecha futura confirmada. Puedes registrar interés por WhatsApp.";
       const action = language === "en" ? { label: "Notify me via WhatsApp", message: "Register interest via WhatsApp for Systems Engineering", variant: "primary" as const } : language === "pt" ? { label: "Avisar por WhatsApp", message: "Registrar interesse por WhatsApp para Engenharia de Sistemas", variant: "primary" as const } : { label: "Avisarme por WhatsApp", message: "Registrar interés por WhatsApp para Ingeniería de Sistemas", variant: "primary" as const };
       return { reply, toolUsed: "checkCohort", ui: createActions([action]) };
     }
     memory.programId = "systems";
+    memory.currentProgramName = language === "en" ? "Systems Engineering" : language === "pt" ? "Engenharia de Sistemas" : "Ingeniería de Sistemas";
     const actions = language === "en" ? [{ label: "Register interest", message: "Register interest for Systems Engineering", variant: "primary" as const }, { label: "Talk to Admissions", message: "Talk to Admissions" }] : language === "pt" ? [{ label: "Registrar interesse", message: "Registrar interesse em Engenharia de Sistemas", variant: "primary" as const }, { label: "Falar com Admissões", message: "Falar com Admissões" }] : [{ label: "Registrar interés", message: "Registrar interés para Ingeniería de Sistemas", variant: "primary" as const }, { label: "Hablar con Admisiones", message: "Hablar con Admisiones" }];
     return { reply: language === "en" ? "I found this simulated program information." : language === "pt" ? "Encontrei estas informações simuladas do programa." : "Encontré esta información simulada del programa.", toolUsed: "consultProgram", ui: createProgramCard(program, actions) };
   }
   if (programId === "design" || lower.includes("cohorte disponible") || lower.includes("cohort available") || lower.includes("cohort is available") || lower.includes("turma disponivel")) {
     memory.programId = "design";
+    memory.currentProgramName = language === "es" ? "Diseño" : "Design";
     if (mode === "ai" && simulation?.cohortOpen === true) {
       const base = tools.consultProgram("design")!;
       const program = { ...base, cohortOpen: true, period: "2027-1 (simulado)", deadline: "30 de noviembre de 2026 (simulada)", requirements: ["Formulario de inscripción simulado", "Documentos académicos simulados"], costCop: 24000000, status: "Cohorte simulada abierta" };
