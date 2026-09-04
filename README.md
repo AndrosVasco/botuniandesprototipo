@@ -49,6 +49,9 @@ El modo Demo no requiere configuración. Para IA, crea `backend/.env` a partir d
 ```env
 OPENAI_API_KEY=tu-api-key
 OPENAI_MODEL=gpt-4.1-mini
+APP_ACCESS_CODE=tu-codigo-privado-de-acceso
+AI_ACCESS_CODE=tu-codigo-privado-para-ia
+AUTH_SECRET=un-secreto-aleatorio-largo-para-firmar-sesiones
 PORT=3001
 CORS_ORIGIN=http://localhost:5173
 ```
@@ -86,3 +89,11 @@ Los procesos actuales operan sobre solo tres registros fijos. Si el catálogo o 
 - El frontend no incluye ni recibe la API key.
 - No se solicita identificación ni datos personales para consultar programas.
 - Se solicita autorización antes de registrar cualquier dato de contacto.
+
+## Acceso temporal
+
+La aplicación exige un código inicial y un segundo código para habilitar IA. Ambos se validan exclusivamente en backend mediante `APP_ACCESS_CODE` y `AI_ACCESS_CODE`; nunca deben usar el prefijo `VITE_` ni escribirse en el frontend. `AUTH_SECRET` firma el token temporal.
+
+La sesión expira cinco minutos después del acceso inicial. Habilitar IA no reinicia ni amplía ese plazo. El frontend conserva el token solo en memoria y el backend protege `/api/chat` y `/api/session/reset`, por lo que ocultar la pantalla no es la única barrera. Los intentos fallidos tienen un límite básico por instancia.
+
+En Vercel, agrega las tres variables en **Settings → Environment Variables** para Production y Preview y vuelve a desplegar. Si faltan, el backend devuelve `Acceso temporal no configurado` sin permitir el ingreso.

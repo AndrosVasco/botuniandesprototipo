@@ -4,7 +4,7 @@ body { margin: 0; min-width: 320px; min-height: 100vh; }
 button, input { font: inherit; }
 button { cursor: pointer; }
 .page-shell { min-height: 100vh; display: grid; place-items: center; padding: 24px; background: radial-gradient(circle at 12% 10%, rgba(39,116,110,.10), transparent 32%), #fafaf7; }
-.chat-widget { width: min(920px, 100%); height: min(780px, calc(100vh - 48px)); display: flex; flex-direction: column; background: #fff; border: 1px solid #d8e1e3; border-radius: 12px; box-shadow: 0 22px 55px rgba(20,47,70,.14); overflow: hidden; }
+.chat-widget { position: relative; width: min(920px, 100%); height: min(780px, calc(100vh - 48px)); display: flex; flex-direction: column; background: #fff; border: 1px solid #d8e1e3; border-radius: 12px; box-shadow: 0 22px 55px rgba(20,47,70,.14); overflow: hidden; }
 .chat-header { display: flex; align-items: center; gap: 14px; padding: 17px 20px; background: #142f46; color: #fff; }
 .chat-header__icon { width: 42px; height: 42px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 10px; background: #27746e; color: #fff; }
 .chat-header__copy h1 { margin: 0; font-size: 1.18rem; }
@@ -55,4 +55,25 @@ button:disabled { cursor: not-allowed; opacity: .58; }
 .composer input { width: 100%; border: 1px solid #bdccd1; border-radius: 8px; padding: 11px 13px; outline: none; color: #263238; }
 .composer input:focus { border-color: #27746e; box-shadow: 0 0 0 3px rgba(39,116,110,.14); }
 .composer button { border: 0; border-radius: 8px; background: #d6aa35; color: #142f46; display: grid; place-items: center; }
+.access-shell { min-height: 100vh; display: grid; place-items: center; padding: 24px; background: radial-gradient(circle at 12% 10%, rgba(39,116,110,.12), transparent 34%), #fafaf7; }
+.access-card { width: min(420px, 100%); padding: 30px; border: 1px solid #d8e1e3; border-radius: 14px; background: #fff; box-shadow: 0 22px 55px rgba(20,47,70,.14); }
+.access-icon { width: 48px; height: 48px; display: grid; place-items: center; margin-bottom: 18px; border-radius: 10px; background: #142f46; color: #fff; }
+.access-kicker { color: #27746e; font-size: .76rem; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; }
+.access-card h1 { margin: 7px 0 8px; color: #142f46; font-size: 1.45rem; }
+.access-card > p, .unlock-card p { margin: 0 0 20px; color: #60727a; line-height: 1.5; }
+.access-card form, .unlock-card { display: grid; gap: 9px; }
+.access-card label, .unlock-card label { color: #263238; font-size: .82rem; font-weight: 750; }
+.access-input { display: grid; grid-template-columns: 22px 1fr; align-items: center; gap: 7px; padding: 0 12px; border: 1px solid #bdccd1; border-radius: 8px; color: #60727a; }
+.access-input:focus-within { border-color: #27746e; box-shadow: 0 0 0 3px rgba(39,116,110,.14); }
+.access-input input { min-width: 0; border: 0; padding: 12px 0; outline: 0; }
+.access-card form > button { margin-top: 6px; border: 0; border-radius: 8px; padding: 11px; background: #27746e; color: #fff; font-weight: 750; }
+.access-error { color: #a4493d; font-size: .82rem; }
+.unlock-overlay { position: absolute; inset: 0; z-index: 10; display: grid; place-items: center; padding: 20px; background: rgba(20,47,70,.58); backdrop-filter: blur(2px); }
+.unlock-card { width: min(390px, 100%); padding: 24px; border-radius: 12px; background: #fff; box-shadow: 0 20px 50px rgba(0,0,0,.25); }
+.unlock-card h2 { margin: 0; color: #142f46; font-size: 1.2rem; }
+.unlock-card input { border: 1px solid #bdccd1; border-radius: 8px; padding: 11px 12px; outline: none; }
+.unlock-card input:focus { border-color: #27746e; box-shadow: 0 0 0 3px rgba(39,116,110,.14); }
+.unlock-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; }
+.unlock-actions button { border: 1px solid #bdccd1; border-radius: 8px; padding: 9px 12px; background: #fff; color: #263238; }
+.unlock-actions button.primary { border-color: #27746e; background: #27746e; color: #fff; }
 @media (max-width: 720px) { .page-shell { padding: 0; } .chat-widget { height: 100vh; border: 0; border-radius: 0; } .chat-header { align-items: flex-start; padding: 13px; } .chat-header__icon { display: none; } .header-actions { gap: 5px; } .status { display: none; } .simulation-controls { justify-content: flex-start; overflow-x: auto; } .simulation-control { flex: 0 0 auto; } .toolbar { align-items: flex-start; } .reset-button span { display: none; } .program-card dl { grid-template-columns: 1fr; } }
