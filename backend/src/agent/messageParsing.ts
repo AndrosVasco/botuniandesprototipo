@@ -1,7 +1,6 @@
 import type { ContactChannel, Language, Program } from "../types/domain.js";
 
 export const emailRegex = /[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}/;
-export const phoneRegex = /\+?[0-9][0-9\s-]{6,18}[0-9]/;
 const normalize = (value: string) => value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
 export function extractProgram(message: string): Program["id"] | null {
@@ -21,7 +20,12 @@ export function extractLanguage(message: string): Language | null {
   return null;
 }
 export function extractEmail(message: string) { return message.match(emailRegex)?.[0] ?? null; }
-export function extractPhone(message: string) { return message.match(phoneRegex)?.[0]?.trim() ?? null; }
+export function extractPhone(message: string) {
+  const value = message.trim();
+  if (!/^\+?[0-9\s()\-]+$/.test(value)) return null;
+  const digits = value.replace(/\D/g, "");
+  return digits.length >= 7 && digits.length <= 15 ? value : null;
+}
 export function extractChannel(message: string): ContactChannel | null {
   const value = normalize(message);
   if (value.includes("correo") || value.includes("email") || value.includes("e-mail")) return "email";
