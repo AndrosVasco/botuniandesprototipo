@@ -2,7 +2,7 @@
 import cors from "cors";
 import express from "express";
 import { handleChat } from "./agent/agentController.js";
-import { resetSession } from "./memory/sessionStore.js";
+import { resetSession, restoreSession } from "./memory/sessionStore.js";
 import type { Language, SimulationControls } from "./types/domain.js";
 import { allowAttempt, authConfigured, bearer, issueToken, validateCode, verifyToken } from "./auth/accessAuth.js";
 const app = express();
@@ -37,7 +37,7 @@ app.post("/api/access/unlock-ai", (req, res) => {
 });
 app.post("/api/chat", async (req, res) => {
   try {
-    const { sessionId, message, mode, language, simulation } = req.body ?? {};
+    const { sessionId, message, mode, language, simulation, context, history } = req.body ?? {};
     if (!sessionId || typeof sessionId !== "string") return res.status(400).json({ error: "sessionId es requerido." });
     if (!message || typeof message !== "string") return res.status(400).json({ error: "message es requerido." });
     const claims = verifyToken(bearer(req.headers.authorization));
@@ -49,6 +49,7 @@ app.post("/api/chat", async (req, res) => {
       cohortOpen: simulation?.cohortOpen !== false,
       aiError: simulation?.aiError === true
     };
+    restoreSession(sessionId, safeLanguage, context, history);
     res.json(await handleChat(sessionId, message.trim(), mode === "ai" ? "ai" : "demo", safeLanguage, safeSimulation));
   } catch (error) {
     console.error(error);

@@ -71,6 +71,10 @@ function simulatedAcademicContext(memory: SessionMemory, simulation: SimulationC
   return `CURRENT SIMULATED RECORD (the only source of academic facts):
 - Selected program: ${program}
 - Cohort: ${cohort}
+- Modality and location: in-person in Bogotá
+- Program duration: 8 academic semesters
+- Application fee: COP 180,000
+- Classes begin: January 25, 2027 when the 2027-1 cohort is open
 - Requirements: application form; academic documents
 - Application: review program record -> complete application form -> review and submit -> receive admission result
 - Enrollment: accept place -> review tuition -> open payment link -> confirm enrollment
@@ -94,7 +98,8 @@ function localAiContextReply(memory: SessionMemory, simulation: SimulationContro
 function isControlledIntent(message: string) {
   const lower = message.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
   return /(consultar un programa|programa y sus fechas|program and its dates|programa e suas datas|cohorte disponible|cohort (?:is )?available|turma disponivel|sistemas|systems|diseno|design|programa especial|special program|registrar interes|register interest|registrar interesse|notify me|avisar|intentar de nuevo|try again|tentar novamente)/.test(lower)
-    || /(?:hablar|contactar|talk|contact|falar|contatar).*(?:admisiones|admissions|admissoes)/.test(lower);
+    || /\b(asesor|advisor|assessor|atendente)\b/.test(lower)
+    || /(?:hablar|contactar|pasar|comunicar|talk|contact|speak|falar|contatar).*(?:admisiones|admissions|admissoes|persona|humano|agent|human)/.test(lower);
 }
 
 async function aiConversation(sessionId: string, message: string, memory: SessionMemory, simulation: SimulationControls) {
@@ -150,7 +155,8 @@ export async function handleChat(sessionId: string, message: string, mode: "demo
 
   const local = await runFallbackAgent(message, memory, mode, simulation);
   let reply = local.reply;
-  if (mode === "ai" && openai && !memory.useLocalFallback) {
+  const preserveAdvisorHandoff = local.toolUsed === "checkAdvisorAvailability" && memory.advisorMode;
+  if (mode === "ai" && openai && !memory.useLocalFallback && !preserveAdvisorHandoff) {
     try { reply = await naturalize(local.reply, responseLanguage, memory.advisorMode); }
     catch (error) { console.error("OpenAI unavailable; using controlled local fallback", error); memory.useLocalFallback = true; }
   }

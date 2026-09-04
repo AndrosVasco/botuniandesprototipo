@@ -23,6 +23,7 @@ export function ChatWidget({ access, onAccessChange, onExpired }: { access: Acce
   const [unlockingAi, setUnlockingAi] = useState(false);
   const [aiEnabled, setAiEnabled] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([{ id: "welcome", role: "assistant", content: content.es.welcome }]);
+  const [conversationContext, setConversationContext] = useState<Record<string, unknown> | null>(null);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -40,7 +41,9 @@ export function ChatWidget({ access, onAccessChange, onExpired }: { access: Acce
     setMessages((current) => [...current, { id: crypto.randomUUID(), role: "user", content: clean }]);
     setInput(""); setError(null); setIsLoading(true);
     try {
-      const response = await sendChatMessage(sessionId, clean, mode, language, simulation, access.token);
+      const history = messages.slice(-10).map(({ role, content }) => ({ role, content }));
+      const response = await sendChatMessage(sessionId, clean, mode, language, simulation, access.token, conversationContext, history);
+      setConversationContext(response.memory);
       setMessages((current) => [...current, { id: crypto.randomUUID(), role: "assistant", content: response.reply, toolUsed: response.toolUsed, ui: response.ui }]);
     } catch (reason) {
       if (reason instanceof AccessExpiredError) { onExpired(); return; }
@@ -49,8 +52,8 @@ export function ChatWidget({ access, onAccessChange, onExpired }: { access: Acce
   }
 
   function onSubmit(event: FormEvent<HTMLFormElement>) { event.preventDefault(); void submit(); }
-  function changeLanguage(next: Language) { setLanguage(next); setMessages([{ id: crypto.randomUUID(), role: "assistant", content: content[next].welcome }]); setSessionId(`aspirantes-${crypto.randomUUID()}`); setError(null); }
-  async function reset() { await resetChatSession(sessionId, language, access.token); setSessionId(`aspirantes-${crypto.randomUUID()}`); setMessages([{ id: crypto.randomUUID(), role: "assistant", content: t.welcome }]); setError(null); setInput(""); }
+  function changeLanguage(next: Language) { setLanguage(next); setMessages([{ id: crypto.randomUUID(), role: "assistant", content: content[next].welcome }]); setConversationContext(null); setSessionId(`aspirantes-${crypto.randomUUID()}`); setError(null); }
+  async function reset() { await resetChatSession(sessionId, language, access.token); setSessionId(`aspirantes-${crypto.randomUUID()}`); setMessages([{ id: crypto.randomUUID(), role: "assistant", content: t.welcome }]); setConversationContext(null); setError(null); setInput(""); }
   function selectAiMode() { if (aiEnabled) setMode("ai"); else { setAiUnlockError(""); setAiCode(""); setShowAiUnlock(true); } }
   async function authorizeAi(event: FormEvent) {
     event.preventDefault(); setUnlockingAi(true); setAiUnlockError("");

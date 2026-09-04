@@ -155,7 +155,7 @@ export async function runFallbackAgent(message: string, memory: SessionMemory, m
     const label = language === "en" ? "Notify me when it opens" : language === "pt" ? "Avisar quando abrir" : "Avisarme cuando se abra";
     return { reply: t.noCohort, toolUsed: "checkCohort", ui: createActions([{ label, message: label, variant: "primary" }]) };
   }
-  if (lower.includes("admisiones") || lower.includes("admissions") || lower.includes("admissoes")) {
+  if (lower.includes("admisiones") || lower.includes("admissions") || lower.includes("admissoes") || /\b(asesor|persona|humano|advisor|agent|human|assessor|atendente)\b/.test(lower)) {
     if (lower.includes("contactar") || lower.includes("contact admissions") || lower.includes("contact request") || lower.includes("contatar admissoes") || lower.includes("no disponible")) {
       memory.step = "choose_advisor_channel"; resetContact(memory);
       return { reply: t.chooseChannel, toolUsed: "checkAdvisorAvailability", ui: createActions(channelActions(language)) };

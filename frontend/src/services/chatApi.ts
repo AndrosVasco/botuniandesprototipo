@@ -15,8 +15,8 @@ async function request(path: string, init: RequestInit = {}) {
 }
 export function unlockApplication(code: string): Promise<AccessSession> { return request("/api/access/unlock", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ code }) }); }
 export function unlockAi(code: string, token: string): Promise<AccessSession> { return request("/api/access/unlock-ai", { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, body: JSON.stringify({ code }) }); }
-export function sendChatMessage(sessionId: string, message: string, mode: ChatMode, language: Language, simulation: SimulationControls, token: string): Promise<ChatResponse> {
-  return request("/api/chat", { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, body: JSON.stringify({ sessionId, message, mode, language, simulation }) });
+export function sendChatMessage(sessionId: string, message: string, mode: ChatMode, language: Language, simulation: SimulationControls, token: string, context: Record<string, unknown> | null, history: Array<{ role: "user" | "assistant"; content: string }>): Promise<ChatResponse> {
+  return request("/api/chat", { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, body: JSON.stringify({ sessionId, message, mode, language, simulation, context, history }) });
 }
 export async function resetChatSession(sessionId: string, language: Language, token: string) {
   await request("/api/session/reset", { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, body: JSON.stringify({ sessionId, language }) }).catch(() => undefined);
