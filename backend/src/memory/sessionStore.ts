@@ -12,6 +12,7 @@ export function getMemory(sessionId: string, language: Language = "es") {
   memory.language = language;
   return memory;
 }
+export function getCurrentLanguage(sessionId: string) { return memories.get(sessionId)?.language ?? null; }
 export function getRecentMessages(sessionId: string, limit = 6) { return (histories.get(sessionId) ?? []).slice(-limit); }
 export function addMessage(sessionId: string, message: ChatMessage) { histories.set(sessionId, [...(histories.get(sessionId) ?? []), message].slice(-20)); }
 export function summarizeIntoMemory(sessionId: string) {

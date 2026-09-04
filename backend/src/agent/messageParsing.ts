@@ -26,6 +26,18 @@ export function extractPhone(message: string) {
   const digits = value.replace(/\D/g, "");
   return digits.length >= 7 && digits.length <= 15 ? value : null;
 }
+export function detectMessageLanguage(message: string, fallback: Language): Language {
+  const value = normalize(message);
+  const scores: Record<Language, number> = { es: 0, en: 0, pt: 0 };
+  const terms: Record<Language, string[]> = {
+    es: ["quiero", "necesito", "puedo", "carrera", "cohorte", "correo", "llamada", "admisiones", "requisitos", "gracias", "hola", "autorizo", "confirmar"],
+    en: ["i want", "need", "can i", "program", "career", "cohort", "email", "call", "admissions", "requirements", "thank", "hello", "authorize", "confirm"],
+    pt: ["quero", "preciso", "posso", "curso", "turma", "e-mail", "ligacao", "admissoes", "requisitos", "obrigad", "ola", "autorizo", "confirmar"]
+  };
+  for (const language of ["es", "en", "pt"] as Language[]) for (const term of terms[language]) if (value.includes(term)) scores[language] += term.includes(" ") ? 2 : 1;
+  const best = (["es", "en", "pt"] as Language[]).sort((a, b) => scores[b] - scores[a])[0];
+  return scores[best] > 0 && scores[best] > scores[fallback] ? best : fallback;
+}
 export function extractChannel(message: string): ContactChannel | null {
   const value = normalize(message);
   if (value.includes("correo") || value.includes("email") || value.includes("e-mail")) return "email";
@@ -46,13 +58,16 @@ export function isOutOfScope(message: string) {
 
 export function isAdmissionsRelated(message: string) {
   const value = normalize(message);
-  return ["hola", "gracias", "programa", "carrera", "pregrado", "posgrado", "maestria", "especializacion", "doctorado", "admis", "cohorte", "turma", "requisito", "fecha", "costo", "cuesta", "valor", "beca", "financi", "inscrip", "matricul", "pago", "aspirante", "universidad", "uniandes", "sistemas", "diseno", "ingenieria", "derecho", "medicina", "economia", "arquitectura", "psicologia", "contact", "correo", "email", "whatsapp", "llamada", "autoriz", "confirm", "correg", "avisar", "interes", "simular falla", "reintent", "try again", "intentar de nuevo"].some((term) => value.includes(term));
+  return ["hola", "gracias", "programa", "carrera", "pregrado", "posgrado", "maestria", "especializacion", "doctorado", "admis", "cohorte", "turma", "requisito", "fecha", "costo", "cuesta", "valor", "beca", "financi", "inscrip", "matricul", "pago", "aspirante", "universidad", "uniandes", "sistemas", "diseno", "ingenieria", "derecho", "medicina", "economia", "arquitectura", "psicologia", "program", "career", "undergraduate", "graduate", "master", "cohort", "requirement", "date", "cost", "admissions", "design", "engineering", "medicine", "course", "requirements", "datas", "custos", "pagamento", "contact", "correo", "email", "whatsapp", "llamada", "call", "ligacao", "autoriz", "authorize", "confirm", "correg", "correct", "avisar", "notify", "interes", "interest", "simular falla", "reintent", "try again", "intentar de nuevo"].some((term) => value.includes(term));
 }
 
 export function extractRequestedCareer(message: string) {
-  const patterns = [/(?:carrera|programa|pregrado|posgrado|maestr[ií]a|especializaci[oó]n|doctorado)\s+(?:de|en)?\s*([\p{L}][\p{L}\s]{2,60})/iu, /(?:estudiar|consultar|informaci[oó]n (?:de|sobre))\s+([\p{L}][\p{L}\s]{2,60})/iu];
+  const patterns = [
+    /(?:carrera|programa|pregrado|posgrado|maestr[ií]a|especializaci[oó]n|doctorado|career|program|undergraduate|graduate|master|course|curso)\s+(?:de|en|in|of)?\s*([\p{L}][\p{L}\s]{2,60})/iu,
+    /(?:estudiar|consultar|informaci[oó]n (?:de|sobre)|study|information (?:about|on)|informa[cç][oõ]es (?:sobre|do|de))\s+([\p{L}][\p{L}\s]{2,60})/iu
+  ];
   for (const pattern of patterns) {
-    const value = message.match(pattern)?.[1]?.trim().replace(/[?.!,;:].*$/, "");
+    const value = message.match(pattern)?.[1]?.trim().replace(/[?.!,;:].*$/, "").replace(/^(?:the|o|a)\s+/i, "").replace(/\s+(?:program|course|programa|curso)$/i, "");
     if (value) return value;
   }
   return null;

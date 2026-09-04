@@ -18,6 +18,7 @@ No incluye base de datos, autenticación, RAG, analítica, CRM, mensajería ni l
 
 - **Demo:** Admisiones aparece cerrado con horario simulado de lunes a viernes, 8:00 a. m. a 5:00 p. m., y permite dejar una solicitud de contacto.
 - **IA:** el asistente conversa como bot sobre temas del prototipo. Puede consultar una carrera escrita por el usuario; para demostrar ambos estados, la primera consulta de esa carrera muestra cohorte simulada abierta y la segunda muestra que no hay cohorte ni fecha confirmada.
+- En modo IA, el backend detecta ES, EN o PT a partir de cada mensaje y conserva ese idioma durante respuestas cortas del mismo flujo, aunque el selector estuviera en otro idioma.
 - Al solicitar Admisiones en modo IA, la sesión cambia a una experiencia de asesor humano simulado, limitada a carreras, admisiones, requisitos, costos, cohortes, matrícula y pagos del prototipo.
 - La matrícula genera solo un identificador `MATR-DEMO`; los enlaces de pago usan el dominio reservado `demo.invalid` y no ejecutan cobros.
 - Cualquier pregunta fuera del alcance se bloquea en backend antes de llamar a OpenAI.

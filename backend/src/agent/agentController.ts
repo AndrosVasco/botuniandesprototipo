@@ -1,8 +1,8 @@
-import { addMessage, getMemory, getRecentMessages, summarizeIntoMemory } from "../memory/sessionStore.js";
+import { addMessage, getCurrentLanguage, getMemory, getRecentMessages, summarizeIntoMemory } from "../memory/sessionStore.js";
 import { model, openai } from "../openai/client.js";
 import type { Language, Program, SessionMemory, SimulationControls } from "../types/domain.js";
 import { createActions, createProgramCard } from "./productUi.js";
-import { extractRequestedCareer, isAdmissionsRelated, isOutOfScope } from "./messageParsing.js";
+import { detectMessageLanguage, extractRequestedCareer, isAdmissionsRelated, isOutOfScope } from "./messageParsing.js";
 import { runFallbackAgent } from "./fallbackAgent.js";
 
 const scopeReplies: Record<Language, string> = {
@@ -28,22 +28,34 @@ function dynamicProgramReply(name: string, memory: SessionMemory, cohortOverride
   memory.currentProgramName = name;
   memory.programId = `dynamic:${key}`;
   const open = cohortOverride ?? count % 2 === 1;
+  const language = memory.language;
   if (open) {
-    const program: Program = { id: memory.programId, name, cohortOpen: true, period: "2027-1 (simulado)", deadline: "30 de noviembre de 2026 (simulada)", requirements: ["Formulario de inscripción simulado", "Documentos académicos simulados"], costCop: 24000000, source: "Ficha académica simulada", status: "Cohorte simulada abierta para esta consulta" };
-    return { reply: `Para **${name}**, ${cohortOverride === undefined ? "esta primera consulta" : "la configuración controlada"} muestra una **cohorte simulada abierta**. Los datos no son información oficial de la Universidad.`, toolUsed: "consultProgram", ui: createProgramCard(program, [{ label: "Registrar interés por WhatsApp", message: `Registrar interés por WhatsApp para ${name}`, variant: "primary" }, { label: "Hablar con Admisiones", message: "Hablar con Admisiones" }]) };
+    const program: Program = language === "en"
+      ? { id: memory.programId, name, cohortOpen: true, period: "2027-1 (simulated)", deadline: "November 30, 2026 (simulated)", requirements: ["Simulated application form", "Simulated academic documents"], costCop: 24000000, source: "Simulated academic record", status: "Simulated cohort available" }
+      : language === "pt"
+        ? { id: memory.programId, name, cohortOpen: true, period: "2027-1 (simulado)", deadline: "30 de novembro de 2026 (simulada)", requirements: ["Formulário de inscrição simulado", "Documentos acadêmicos simulados"], costCop: 24000000, source: "Ficha acadêmica simulada", status: "Turma simulada disponível" }
+        : { id: memory.programId, name, cohortOpen: true, period: "2027-1 (simulado)", deadline: "30 de noviembre de 2026 (simulada)", requirements: ["Formulario de inscripción simulado", "Documentos académicos simulados"], costCop: 24000000, source: "Ficha académica simulada", status: "Cohorte simulada abierta para esta consulta" };
+    const reply = language === "en" ? `For **${name}**, the controlled configuration shows an **available simulated cohort**. This is not official university information.` : language === "pt" ? `Para **${name}**, a configuração controlada mostra uma **turma simulada disponível**. Esta não é uma informação oficial da Universidade.` : `Para **${name}**, la configuración controlada muestra una **cohorte simulada abierta**. Los datos no son información oficial de la Universidad.`;
+    const actions = language === "en" ? [{ label: "Register interest via WhatsApp", message: `Register interest via WhatsApp for ${name}`, variant: "primary" as const }, { label: "Talk to Admissions", message: "Talk to Admissions" }] : language === "pt" ? [{ label: "Registrar interesse por WhatsApp", message: `Registrar interesse por WhatsApp para ${name}`, variant: "primary" as const }, { label: "Falar com Admissões", message: "Falar com Admissões" }] : [{ label: "Registrar interés por WhatsApp", message: `Registrar interés por WhatsApp para ${name}`, variant: "primary" as const }, { label: "Hablar con Admisiones", message: "Hablar con Admisiones" }];
+    return { reply, toolUsed: "consultProgram", ui: createProgramCard(program, actions) };
   }
-  return { reply: `Para **${name}**, ${cohortOverride === undefined ? "esta segunda consulta" : "la configuración controlada"} muestra **sin cohorte abierta** y sin fecha futura confirmada. No inventaré una fecha. Puedes registrar interés para contacto simulado.`, toolUsed: "checkCohort", ui: createActions([{ label: "Avisarme por WhatsApp", message: `Registrar interés por WhatsApp para ${name}`, variant: "primary" }]) };
+  const reply = language === "en" ? `For **${name}**, the controlled configuration shows **no available cohort** and no confirmed future date. I will not invent a date. You may register interest for simulated contact.` : language === "pt" ? `Para **${name}**, a configuração controlada mostra **nenhuma turma disponível** e nenhuma data futura confirmada. Não vou inventar uma data. Você pode registrar interesse para contato simulado.` : `Para **${name}**, la configuración controlada muestra **sin cohorte abierta** y sin fecha futura confirmada. No inventaré una fecha. Puedes registrar interés para contacto simulado.`;
+  const action = language === "en" ? { label: "Notify me via WhatsApp", message: `Register interest via WhatsApp for ${name}`, variant: "primary" as const } : language === "pt" ? { label: "Avisar por WhatsApp", message: `Registrar interesse por WhatsApp para ${name}`, variant: "primary" as const } : { label: "Avisarme por WhatsApp", message: `Registrar interés por WhatsApp para ${name}`, variant: "primary" as const };
+  return { reply, toolUsed: "checkCohort", ui: createActions([action]) };
 }
 
 function simulatedProcessReply(message: string, memory: SessionMemory) {
   const lower = message.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-  if (lower.includes("pago") || lower.includes("payment")) return "Puedo generar únicamente un enlace de pago **no funcional** para la demostración: [Abrir pago simulado](https://pagos.demo.invalid/uniandes). No se realizará ningún cobro ni se enviarán datos a una pasarela real.";
-  if (lower.includes("matricul") || lower.includes("enrollment")) return `Generé una posible matrícula **exclusivamente simulada**: **MATR-DEMO-${String(Object.keys(memory.programConsultations).length + 1).padStart(4, "0")}**. No crea un estudiante, no reserva cupo y no tiene validez académica.`;
+  if (lower.includes("pago") || lower.includes("payment") || lower.includes("pagamento")) return memory.language === "en" ? "I can only generate a **non-functional** demonstration payment link: [Open simulated payment](https://pagos.demo.invalid/uniandes). No charge or real payment-gateway submission will occur." : memory.language === "pt" ? "Só posso gerar um link de pagamento **não funcional** para demonstração: [Abrir pagamento simulado](https://pagos.demo.invalid/uniandes). Nenhuma cobrança ou envio a uma plataforma real será realizado." : "Puedo generar únicamente un enlace de pago **no funcional** para la demostración: [Abrir pago simulado](https://pagos.demo.invalid/uniandes). No se realizará ningún cobro ni se enviarán datos a una pasarela real.";
+  if (lower.includes("matricul") || lower.includes("enrollment")) {
+    const id = `MATR-DEMO-${String(Object.keys(memory.programConsultations).length + 1).padStart(4, "0")}`;
+    return memory.language === "en" ? `I generated an **exclusively simulated** enrollment: **${id}**. It does not create a student record, reserve a place, or have academic validity.` : memory.language === "pt" ? `Gerei uma matrícula **exclusivamente simulada**: **${id}**. Ela não cria um aluno, não reserva vaga e não tem validade acadêmica.` : `Generé una posible matrícula **exclusivamente simulada**: **${id}**. No crea un estudiante, no reserva cupo y no tiene validez académica.`;
+  }
   return null;
 }
 
 async function advisorConversation(sessionId: string, message: string, memory: SessionMemory) {
-  if (!openai) return "Te atiendo como asesor simulado de Admisiones. Puedo aclarar dudas del prototipo sobre carreras, cohortes, requisitos, costos, matrícula simulada o pagos simulados. El modo IA está usando el respaldo local en este momento.";
+  if (!openai) return memory.language === "en" ? "I am assisting you as a simulated Admissions advisor. I can answer prototype questions about programs, cohorts, requirements, costs, simulated enrollment, or simulated payments. AI mode is currently using local fallback." : memory.language === "pt" ? "Estou atendendo como assessor simulado de Admissões. Posso esclarecer dúvidas do protótipo sobre cursos, turmas, requisitos, custos, matrícula ou pagamentos simulados. O modo IA está usando o fallback local." : "Te atiendo como asesor simulado de Admisiones. Puedo aclarar dudas del prototipo sobre carreras, cohortes, requisitos, costos, matrícula simulada o pagos simulados. El modo IA está usando el respaldo local en este momento.";
   const result = await openai.chat.completions.create({ model, temperature: 0.35, messages: [
     { role: "system", content: `Responde en ${languageName(memory.language)} como un asesor humano simulado de Admisiones de la Universidad de los Andes dentro de un prototipo técnico. Conversa solo sobre programas, cohortes, requisitos, costos, admisiones, matrícula simulada y pagos simulados. Toda información debe declararse simulada; nunca afirmes datos oficiales, no inventes hechos de la Universidad, no prometas admisión ni tiempos, no solicites identificación, no generes cobros reales y no uses enlaces reales. Si falta un dato, dilo. Sé cálido, breve y natural.` },
     ...getRecentMessages(sessionId, 7).slice(0, -1).map((item) => ({ role: item.role, content: item.content } as const)),
@@ -53,31 +65,32 @@ async function advisorConversation(sessionId: string, message: string, memory: S
 }
 
 export async function handleChat(sessionId: string, message: string, mode: "demo" | "ai" = "demo", language: Language = "es", simulation: SimulationControls = { advisorOnline: true, cohortOpen: true, aiError: false }) {
-  const memory = getMemory(sessionId, language);
+  const responseLanguage = mode === "ai" ? detectMessageLanguage(message, getCurrentLanguage(sessionId) ?? language) : language;
+  const memory = getMemory(sessionId, responseLanguage);
   addMessage(sessionId, { role: "user", content: message });
   const pending = memory.step !== "idle";
   if (isOutOfScope(message) || (!pending && !isAdmissionsRelated(message))) {
-    const reply = scopeReplies[language]; addMessage(sessionId, { role: "assistant", content: reply }); summarizeIntoMemory(sessionId);
+    const reply = scopeReplies[responseLanguage]; addMessage(sessionId, { role: "assistant", content: reply }); summarizeIntoMemory(sessionId);
     return { reply, memory, toolUsed: null, ui: null };
   }
 
   if (mode === "ai" && simulation.aiError) {
-    const reply = language === "en" ? "We are experiencing technical difficulties. You can try again now, come back later, or use the alternative demo contacts: **+57 601 555 0100** and **admisiones.demo@example.invalid**." : language === "pt" ? "Estamos enfrentando dificuldades técnicas. Você pode tentar novamente agora, voltar mais tarde ou usar os contatos alternativos de demonstração: **+57 601 555 0100** e **admisiones.demo@example.invalid**." : "Estamos presentando dificultades técnicas. Puedes reintentar ahora, volver más tarde o comunicarte mediante nuestros contactos alternativos de demostración: **+57 601 555 0100** y **admisiones.demo@example.invalid**.";
+    const reply = responseLanguage === "en" ? "We are experiencing technical difficulties. You can try again now, come back later, or use the alternative demo contacts: **+57 601 555 0100** and **admisiones.demo@example.invalid**." : responseLanguage === "pt" ? "Estamos enfrentando dificuldades técnicas. Você pode tentar novamente agora, voltar mais tarde ou usar os contatos alternativos de demonstração: **+57 601 555 0100** e **admisiones.demo@example.invalid**." : "Estamos presentando dificultades técnicas. Puedes reintentar ahora, volver más tarde o comunicarte mediante nuestros contactos alternativos de demostración: **+57 601 555 0100** y **admisiones.demo@example.invalid**.";
     addMessage(sessionId, { role: "assistant", content: reply }); summarizeIntoMemory(sessionId);
-    return { reply, memory, toolUsed: "simulated_ai_disconnect", ui: createActions([{ label: language === "en" ? "Retry AI" : language === "pt" ? "Tentar IA novamente" : "Reintentar IA", message: "__retry_ai__", variant: "primary" }]) };
+    return { reply, memory, toolUsed: "simulated_ai_disconnect", ui: createActions([{ label: responseLanguage === "en" ? "Retry AI" : responseLanguage === "pt" ? "Tentar IA novamente" : "Reintentar IA", message: "__retry_ai__", variant: "primary" }]) };
   }
 
   if (mode === "ai") {
     const processReply = simulatedProcessReply(message, memory);
     if (processReply) {
-      const reply = await naturalize(processReply, language, memory.advisorMode).catch(() => processReply);
+      const reply = await naturalize(processReply, responseLanguage, memory.advisorMode).catch(() => processReply);
       addMessage(sessionId, { role: "assistant", content: reply }); summarizeIntoMemory(sessionId);
       return { reply, memory, toolUsed: null, ui: null };
     }
     const career = extractRequestedCareer(message);
     if (career && !/^(y\b|and\b|e\b)/i.test(career) && !/sistemas|diseño|diseno|especial/i.test(career)) {
       const local = dynamicProgramReply(career, memory, simulation.cohortOpen);
-      const reply = await naturalize(local.reply, language, memory.advisorMode).catch(() => local.reply);
+      const reply = await naturalize(local.reply, responseLanguage, memory.advisorMode).catch(() => local.reply);
       addMessage(sessionId, { role: "assistant", content: reply }); summarizeIntoMemory(sessionId);
       return { ...local, reply, memory };
     }
@@ -91,7 +104,7 @@ export async function handleChat(sessionId: string, message: string, mode: "demo
   const local = await runFallbackAgent(message, memory, mode, simulation);
   let reply = local.reply;
   if (mode === "ai" && openai && !memory.useLocalFallback) {
-    try { reply = await naturalize(local.reply, language, memory.advisorMode); }
+    try { reply = await naturalize(local.reply, responseLanguage, memory.advisorMode); }
     catch (error) { console.error("OpenAI unavailable; using controlled local fallback", error); memory.useLocalFallback = true; }
   }
   addMessage(sessionId, { role: "assistant", content: reply }); summarizeIntoMemory(sessionId);

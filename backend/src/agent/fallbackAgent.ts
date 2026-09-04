@@ -131,28 +131,35 @@ export async function runFallbackAgent(message: string, memory: SessionMemory, m
     if (mode === "ai" && simulation?.cohortOpen === false) {
       program.cohortOpen = false; program.period = null; program.deadline = null; program.status = "Sin cohorte abierta (simulación controlada)";
       memory.programId = "systems";
-      return { reply: "**Ingeniería de Sistemas** no tiene cohorte abierta en esta simulación y no hay una fecha futura confirmada. Puedes registrar interés por WhatsApp.", toolUsed: "checkCohort", ui: createActions([{ label: "Avisarme por WhatsApp", message: "Registrar interés por WhatsApp para Ingeniería de Sistemas", variant: "primary" }]) };
+      const reply = language === "en" ? "**Systems Engineering** has no available cohort in this simulation and no confirmed future date. You may register interest via WhatsApp." : language === "pt" ? "**Engenharia de Sistemas** não tem turma disponível nesta simulação nem data futura confirmada. Você pode registrar interesse por WhatsApp." : "**Ingeniería de Sistemas** no tiene cohorte abierta en esta simulación y no hay una fecha futura confirmada. Puedes registrar interés por WhatsApp.";
+      const action = language === "en" ? { label: "Notify me via WhatsApp", message: "Register interest via WhatsApp for Systems Engineering", variant: "primary" as const } : language === "pt" ? { label: "Avisar por WhatsApp", message: "Registrar interesse por WhatsApp para Engenharia de Sistemas", variant: "primary" as const } : { label: "Avisarme por WhatsApp", message: "Registrar interés por WhatsApp para Ingeniería de Sistemas", variant: "primary" as const };
+      return { reply, toolUsed: "checkCohort", ui: createActions([action]) };
     }
     memory.programId = "systems";
     const actions = language === "en" ? [{ label: "Register interest", message: "Register interest for Systems Engineering", variant: "primary" as const }, { label: "Talk to Admissions", message: "Talk to Admissions" }] : language === "pt" ? [{ label: "Registrar interesse", message: "Registrar interesse em Engenharia de Sistemas", variant: "primary" as const }, { label: "Falar com Admissões", message: "Falar com Admissões" }] : [{ label: "Registrar interés", message: "Registrar interés para Ingeniería de Sistemas", variant: "primary" as const }, { label: "Hablar con Admisiones", message: "Hablar con Admisiones" }];
     return { reply: language === "en" ? "I found this simulated program information." : language === "pt" ? "Encontrei estas informações simuladas do programa." : "Encontré esta información simulada del programa.", toolUsed: "consultProgram", ui: createProgramCard(program, actions) };
   }
-  if (programId === "design" || lower.includes("cohorte disponible") || lower.includes("cohort available") || lower.includes("turma disponivel")) {
+  if (programId === "design" || lower.includes("cohorte disponible") || lower.includes("cohort available") || lower.includes("cohort is available") || lower.includes("turma disponivel")) {
     memory.programId = "design";
     if (mode === "ai" && simulation?.cohortOpen === true) {
       const base = tools.consultProgram("design")!;
       const program = { ...base, cohortOpen: true, period: "2027-1 (simulado)", deadline: "30 de noviembre de 2026 (simulada)", requirements: ["Formulario de inscripción simulado", "Documentos académicos simulados"], costCop: 24000000, status: "Cohorte simulada abierta" };
-      return { reply: "**Diseño** tiene cohorte abierta en esta simulación controlada.", toolUsed: "checkCohort", ui: createProgramCard(program, [{ label: "Registrar interés por WhatsApp", message: "Registrar interés por WhatsApp para Diseño", variant: "primary" }]) };
+      const reply = language === "en" ? "**Design** has an available cohort in this controlled simulation." : language === "pt" ? "**Design** tem uma turma disponível nesta simulação controlada." : "**Diseño** tiene cohorte abierta en esta simulación controlada.";
+      const action = language === "en" ? { label: "Register interest via WhatsApp", message: "Register interest via WhatsApp for Design", variant: "primary" as const } : language === "pt" ? { label: "Registrar interesse por WhatsApp", message: "Registrar interesse por WhatsApp para Design", variant: "primary" as const } : { label: "Registrar interés por WhatsApp", message: "Registrar interés por WhatsApp para Diseño", variant: "primary" as const };
+      return { reply, toolUsed: "checkCohort", ui: createProgramCard(program, [action]) };
     }
     const label = language === "en" ? "Notify me when it opens" : language === "pt" ? "Avisar quando abrir" : "Avisarme cuando se abra";
     return { reply: t.noCohort, toolUsed: "checkCohort", ui: createActions([{ label, message: label, variant: "primary" }]) };
   }
   if (lower.includes("admisiones") || lower.includes("admissions") || lower.includes("admissoes")) {
-    if (lower.includes("contactar") || lower.includes("contact request") || lower.includes("no disponible")) {
+    if (lower.includes("contactar") || lower.includes("contact admissions") || lower.includes("contact request") || lower.includes("contatar admissoes") || lower.includes("no disponible")) {
       memory.step = "choose_advisor_channel"; resetContact(memory);
       return { reply: t.chooseChannel, toolUsed: "checkAdvisorAvailability", ui: createActions(channelActions(language)) };
     }
-    if (mode === "demo" || simulation?.advisorOnline === false) return { reply: mode === "demo" ? t.closed : "Admisiones aparece **offline** en esta simulación. Puedes dejar una solicitud de contacto; no se promete un tiempo de respuesta.", toolUsed: "checkAdvisorAvailability", ui: createActions([{ label: language === "en" ? "Leave contact request" : language === "pt" ? "Deixar solicitação" : "Dejar solicitud", message: language === "en" ? "Contact Admissions" : language === "pt" ? "Contatar Admissões" : "Contactar a Admisiones", variant: "primary" }]) };
+    if (mode === "demo" || simulation?.advisorOnline === false) {
+      const offline = language === "en" ? "Admissions appears **offline** in this simulation. You may leave a contact request." : language === "pt" ? "Admissões aparece **offline** nesta simulação. Você pode deixar uma solicitação de contato." : "Admisiones aparece **offline** en esta simulación. Puedes dejar una solicitud de contacto.";
+      return { reply: mode === "demo" ? t.closed : offline, toolUsed: "checkAdvisorAvailability", ui: createActions([{ label: language === "en" ? "Leave contact request" : language === "pt" ? "Deixar solicitação" : "Dejar solicitud", message: language === "en" ? "Contact Admissions" : language === "pt" ? "Contatar Admissões" : "Contactar a Admisiones", variant: "primary" }]) };
+    }
     memory.advisorMode = true;
     return { reply: language === "en" ? "You are now in the **simulated Admissions advisor** experience. I can clarify questions about programs, cohorts, requirements, costs, enrollment and simulated payments." : language === "pt" ? "Agora você está na experiência de **assessor simulado de Admissões**. Posso esclarecer dúvidas sobre programas, turmas, requisitos, custos, matrícula e pagamentos simulados." : "Ahora te atiendo como **asesor simulado de Admisiones**. Puedo aclarar dudas sobre programas, cohortes, requisitos, costos, matrícula y pagos simulados.", toolUsed: "checkAdvisorAvailability" };
   }
