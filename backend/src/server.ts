@@ -62,6 +62,9 @@ app.post("/api/session/reset", (req, res) => {
   resetSession(sessionId, language === "en" || language === "pt" ? language : "es");
   return res.json({ ok: true });
 });
-app.listen(port, () => console.log(`Backend listo en http://localhost:${port}`));
+// Vercel administra el ciclo de vida HTTP. En local conservamos el servidor tradicional.
+if (!process.env.VERCEL) app.listen(port, () => console.log(`Backend listo en http://localhost:${port}`));
+
+export default app;
 
 
