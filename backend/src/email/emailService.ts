@@ -27,14 +27,14 @@ export async function sendDemoEmail({ to, subject, title, body }: DemoEmailInput
   }
 
   const from = process.env.SMTP_FROM ?? process.env.SMTP_USER;
-  const safeSubject = `[PROTOTIPO TÉCNICO — MENSAJE DE DEMOSTRACIÓN] ${subject}`;
+  const safeSubject = `[Admisiones] ${subject}`;
   const html = `
     <div style="font-family:Arial,sans-serif;color:#172033;line-height:1.5">
-      <p style="display:inline-block;background:#fff3cd;color:#7a5200;padding:6px 10px;border-radius:6px;font-weight:700">PROTOTIPO TÉCNICO — MENSAJE DE DEMOSTRACIÓN</p>
+      <p style="display:inline-block;background:#e8f3f1;color:#176b61;padding:6px 10px;border-radius:6px;font-weight:700">ADMISIONES</p>
       <h2>${title}</h2>
       <div>${body.replace(/\n/g, "<br />")}</div>
       <hr style="border:none;border-top:1px solid #e5e7eb;margin:20px 0" />
-      <p style="color:#64748b;font-size:12px">Información simulada. Este mensaje no confirma una admisión ni reserva un cupo.</p>
+      <p style="color:#64748b;font-size:12px">Este mensaje confirma la recepción de tu solicitud y no representa una decisión de admisión ni reserva un cupo.</p>
     </div>
   `;
 
@@ -42,7 +42,7 @@ export async function sendDemoEmail({ to, subject, title, body }: DemoEmailInput
     from,
     to,
     subject: safeSubject,
-    text: `PROTOTIPO TÉCNICO — MENSAJE DE DEMOSTRACIÓN\n\n${title}\n\n${body}\n\nInformación simulada.`,
+    text: `ADMISIONES\n\n${title}\n\n${body}\n\nEste mensaje confirma la recepción de tu solicitud y no representa una decisión de admisión ni reserva un cupo.`,
     html
   });
 

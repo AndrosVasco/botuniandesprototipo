@@ -5,9 +5,8 @@ export function sendInterestConfirmation(record: InterestRecord, programName: st
   if (record.channel !== "email") return Promise.resolve({ ok: false as const, reason: "not_email" });
   return sendDemoEmail({
     to: record.contact,
-    subject: `Confirmación demostrativa ${record.id}`,
-    title: "Registro de interés simulado",
+    subject: `Confirmación de solicitud ${record.id}`,
+    title: "Registro de interés",
     body: `Programa: ${programName}\nSolicitud: ${record.id}\nEl registro de interés no reserva un cupo.`
   });
 }
-

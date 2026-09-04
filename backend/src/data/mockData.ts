@@ -6,14 +6,14 @@ const programs: Program[] = [
     name: "Ingeniería de Sistemas",
     cohortOpen: true,
     period: "2027-1",
-    deadline: "30 de noviembre de 2026 (simulada)",
-    requirements: ["Formulario de inscripción", "Resultado de admisión", "Documentos académicos simulados"],
-    applicationSteps: ["Revisar la ficha simulada del programa", "Completar el formulario demostrativo", "Confirmar los datos antes de enviar", "Recibir el resultado simulado de admisión"],
-    enrollmentSteps: ["Aceptar el cupo simulado", "Revisar el valor demostrativo", "Abrir el enlace de pago no funcional", "Confirmar la matrícula simulada"],
-    studyStartSteps: ["Consultar el calendario simulado", "Revisar la guía de bienvenida", "Seleccionar materias de demostración", "Iniciar clases en la fecha simulada"],
+    deadline: "30 de noviembre de 2026",
+    requirements: ["Formulario de inscripción", "Resultado de admisión", "Documentos académicos"],
+    applicationSteps: ["Revisar la información del programa", "Completar el formulario de inscripción", "Confirmar los datos antes de enviar", "Recibir el resultado de admisión"],
+    enrollmentSteps: ["Aceptar el cupo", "Revisar el valor de la matrícula", "Abrir el enlace de pago", "Confirmar la matrícula"],
+    studyStartSteps: ["Consultar el calendario académico", "Revisar la guía de bienvenida", "Seleccionar materias", "Iniciar clases en la fecha programada"],
     costCop: 24500000,
-    source: "Ficha académica simulada",
-    status: "Vigente para el prototipo"
+    source: "Ficha académica del programa",
+    status: "Admisiones abiertas"
   },
   {
     id: "design",
@@ -26,7 +26,7 @@ const programs: Program[] = [
     enrollmentSteps: null,
     studyStartSteps: null,
     costCop: null,
-    source: "Ficha académica simulada",
+    source: "Ficha académica del programa",
     status: "Sin cohorte abierta ni fecha futura confirmada"
   },
   {
@@ -40,7 +40,7 @@ const programs: Program[] = [
     enrollmentSteps: null,
     studyStartSteps: null,
     costCop: null,
-    source: "Ficha académica simulada",
+    source: "Ficha académica del programa",
     status: "Información incompleta"
   }
 ];

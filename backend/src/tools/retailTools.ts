@@ -16,8 +16,8 @@ function createRecord(kind: InterestRecord["kind"], input: { programId?: Program
 export function registerInterest(input: { programId: Program["id"]; channel: ContactChannel; contact: string; consent: boolean }) { return createRecord("interest", input); }
 export function checkAdvisorAvailability(mode: "demo" | "ai" = "demo") {
   return mode === "demo"
-    ? { available: false, schedule: "Lunes a viernes, 8:00 a. m. a 5:00 p. m. (simulado)" }
-    : { available: db.advisorAvailable, schedule: "Disponibilidad simulada para modo IA" };
+    ? { available: false, schedule: "Lunes a viernes, 8:00 a. m. a 5:00 p. m." }
+    : { available: db.advisorAvailable, schedule: "Disponibilidad de Admisiones" };
 }
 export function requestAdvisorContact(input: { channel: ContactChannel; contact: string; consent: boolean }) { return createRecord("advisor-contact", input); }
 export function cancelInterest(recordId: string) {
