@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useState } from "react";
 import { GraduationCap, LockKeyhole } from "lucide-react";
 import { ChatWidget } from "./components/ChatWidget";
 import { EnrollmentForm } from "./components/EnrollmentForm";
@@ -9,13 +9,6 @@ export default function App() {
   if (window.location.pathname.replace(/\/$/, "") === "/formulario-inscripcion") return <EnrollmentForm />;
   const [session, setSession] = useState<AccessSession | null>(null);
   const [code, setCode] = useState(""); const [error, setError] = useState(""); const [loading, setLoading] = useState(false);
-  useEffect(() => {
-    if (!session) return;
-    const remaining = session.expiresAt - Date.now();
-    if (remaining <= 0) { setSession(null); return; }
-    const timer = window.setTimeout(() => setSession(null), remaining);
-    return () => window.clearTimeout(timer);
-  }, [session]);
   async function submit(event: FormEvent) {
     event.preventDefault(); setLoading(true); setError("");
     try { setSession(await unlockApplication(code)); setCode(""); }

@@ -12,6 +12,12 @@ const scopeReplies: Record<Language, string> = {
 };
 
 function languageName(language: Language) { return language === "en" ? "English" : language === "pt" ? "Portuguese" : "Spanish"; }
+function aiFailure(sessionId: string, memory: SessionMemory) {
+  const reply = memory.language === "en" ? "I couldn't complete that response. You can try again or continue with an Admissions advisor." : memory.language === "pt" ? "Não consegui concluir essa resposta. Você pode tentar novamente ou continuar com um assessor de Admissões." : "No pude completar esa respuesta. Puedes intentarlo nuevamente o continuar con un asesor de Admisiones.";
+  addMessage(sessionId, { role: "assistant", content: reply });
+  summarizeIntoMemory(sessionId);
+  return { reply, memory, toolUsed: "ai_provider_unavailable", ui: null };
+}
 async function naturalize(reply: string, language: Language, advisorMode = false) {
   if (!openai) return reply;
   const result = await openai.chat.completions.create({ model, temperature: 0.2, messages: [
@@ -107,7 +113,7 @@ async function aiConversation(sessionId: string, message: string, memory: Sessio
   const result = await openai.chat.completions.create({ model, temperature: 0.35, messages: [
     { role: "system", content: `Reply in ${languageName(memory.language)} as ${memory.advisorMode ? "Andrés, a warm human Admissions advisor" : "a clear conversational admissions bot"} in a technical Universidad de los Andes prototype.
 ${simulatedAcademicContext(memory, simulation)}
-Maintain the selected program and facts across turns. Answer only questions about programs, cohorts, requirements, admissions, registration, enrollment, tuition, payments, or Admissions contact. Present the supplied record naturally and confidently. Never mention simulation, fiction, demonstration, unofficial data, prototypes, or internal controls. Never add university facts, links, people, policies, dates, prices, promises, or admission decisions beyond the supplied record. Do not request identity documents or sensitive data. If no program is selected and the answer depends on one, ask which program. If information is absent, say it is not currently available. Be natural, concise, and helpful.` },
+Maintain the selected program, the user's latest intent, and all supplied facts across turns. Behave as a conversational admissions bot: acknowledge the question, answer it directly, and ask at most one useful follow-up question. Answer only questions about programs, cohorts, requirements, admissions, registration, enrollment, tuition, payments, or Admissions contact. Present the supplied record naturally and confidently. Never mention simulation, fiction, demonstration, unofficial data, prototypes, internal controls, APIs, models, tokens, quotas, or technical errors. Never add university facts, links, people, policies, dates, prices, promises, or admission decisions beyond the supplied record. Do not request identity documents or sensitive data. If no program is selected and the answer depends on one, ask which program. If information is absent, say it is not currently available and offer contact with Admissions. When useful, close with a short invitation to continue with an Admissions advisor. Be natural, concise, warm, and helpful.` },
     ...getRecentMessages(sessionId, 7).slice(0, -1).map((item) => ({ role: item.role, content: item.content } as const)),
     { role: "user", content: message }
   ] });
@@ -135,7 +141,9 @@ export async function handleChat(sessionId: string, message: string, mode: "demo
   if (mode === "ai") {
     const processReply = simulatedProcessReply(message, memory);
     if (processReply) {
-      const reply = await naturalize(processReply, responseLanguage, memory.advisorMode).catch(() => processReply);
+      let reply: string;
+      try { reply = await naturalize(processReply, responseLanguage, memory.advisorMode); }
+      catch (error) { console.error("AI provider unavailable", error); return aiFailure(sessionId, memory); }
       addMessage(sessionId, { role: "assistant", content: reply }); summarizeIntoMemory(sessionId);
       return { reply, memory, toolUsed: null, ui: null };
     }
@@ -147,7 +155,9 @@ export async function handleChat(sessionId: string, message: string, mode: "demo
       return { ...local, reply, memory };
     }
     if (!pending && (memory.advisorMode || !isControlledIntent(message))) {
-      const reply = await aiConversation(sessionId, message, memory, simulation).catch(() => localAiContextReply(memory, simulation));
+      let reply: string;
+      try { reply = await aiConversation(sessionId, message, memory, simulation); }
+      catch (error) { console.error("AI provider unavailable", error); return aiFailure(sessionId, memory); }
       addMessage(sessionId, { role: "assistant", content: reply }); summarizeIntoMemory(sessionId);
       const ui = simulation.cohortOpen && currentProgram(memory) ? dynamicProgramReply(currentProgram(memory)!, memory, true).ui : null;
       return { reply, memory, toolUsed: null, ui };
@@ -159,7 +169,7 @@ export async function handleChat(sessionId: string, message: string, mode: "demo
   const preserveAdvisorHandoff = local.toolUsed === "checkAdvisorAvailability" && memory.advisorMode;
   if (mode === "ai" && openai && !memory.useLocalFallback && !preserveAdvisorHandoff) {
     try { reply = await naturalize(local.reply, responseLanguage, memory.advisorMode); }
-    catch (error) { console.error("OpenAI unavailable; using controlled local fallback", error); memory.useLocalFallback = true; }
+    catch (error) { console.error("AI provider unavailable", error); memory.useLocalFallback = true; return aiFailure(sessionId, memory); }
   }
   addMessage(sessionId, { role: "assistant", content: reply }); summarizeIntoMemory(sessionId);
   const isAdvisorHandoff = local.toolUsed === "checkAdvisorAvailability" || memory.advisorMode;
