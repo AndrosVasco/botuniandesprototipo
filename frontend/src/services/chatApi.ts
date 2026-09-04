@@ -22,6 +22,6 @@ export function sendChatMessage(sessionId: string, message: string, mode: ChatMo
 export async function resetChatSession(sessionId: string, language: Language, token: string) {
   await request("/api/session/reset", { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, body: JSON.stringify({ sessionId, language }) }).catch(() => undefined);
 }
-export function sendFeedback(sessionId: string, detail: string, token: string): Promise<FeedbackResponse> {
-  return request("/api/feedback", { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, body: JSON.stringify({ sessionId, detail }) });
+export function sendFeedback(sessionId: string, rating: number, detail: string, token: string): Promise<FeedbackResponse> {
+  return request("/api/feedback", { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, body: JSON.stringify({ sessionId, rating, detail }) });
 }

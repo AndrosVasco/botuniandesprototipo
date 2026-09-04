@@ -20,6 +20,10 @@ function getTransporter() {
   });
 }
 
+function escapeHtml(value: string) {
+  return value.replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" })[character] ?? character);
+}
+
 export async function sendDemoEmail({ to, subject, title, body }: DemoEmailInput) {
   const transporter = getTransporter();
   if (!transporter) {
@@ -31,8 +35,8 @@ export async function sendDemoEmail({ to, subject, title, body }: DemoEmailInput
   const html = `
     <div style="font-family:Arial,sans-serif;color:#172033;line-height:1.5">
       <p style="display:inline-block;background:#e8f3f1;color:#176b61;padding:6px 10px;border-radius:6px;font-weight:700">ADMISIONES</p>
-      <h2>${title}</h2>
-      <div>${body.replace(/\n/g, "<br />")}</div>
+      <h2>${escapeHtml(title)}</h2>
+      <div>${escapeHtml(body).replace(/\n/g, "<br />")}</div>
       <hr style="border:none;border-top:1px solid #e5e7eb;margin:20px 0" />
       <p style="color:#64748b;font-size:12px">Este mensaje confirma la recepción de tu solicitud y no representa una decisión de admisión ni reserva un cupo.</p>
     </div>
@@ -49,13 +53,12 @@ export async function sendDemoEmail({ to, subject, title, body }: DemoEmailInput
   return { ok: true as const };
 }
 
-export function sendInternalFeedback(reference: string, sessionId: string, detail: string) {
-  const to = process.env.FEEDBACK_EMAIL;
-  if (!to) return Promise.resolve({ ok: false as const, reason: "feedback_email_not_configured" });
+export function sendInternalFeedback(reference: string, sessionId: string, rating: number, detail: string) {
+  const to = process.env.FEEDBACK_EMAIL ?? "spark@montoyadigitalbond.com";
   return sendDemoEmail({
     to,
     subject: `Comentario del asistente ${reference}`,
     title: "Oportunidad de mejora reportada",
-    body: `Referencia: ${reference}\nSesión: ${sessionId}\n\n${detail}`
+    body: `Referencia: ${reference}\nSesión: ${sessionId}\nCalificación: ${rating} de 5 estrellas\n\nComentario: ${detail || "Sin comentario adicional"}`
   });
 }

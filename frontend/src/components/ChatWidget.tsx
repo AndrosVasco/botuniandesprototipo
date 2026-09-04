@@ -1,7 +1,8 @@
 import { FormEvent, useEffect, useRef, useState } from "react";
-import { GraduationCap, MessageCircle, RotateCcw, Send, Sparkles, X } from "lucide-react";
+import { CircleHelp, GraduationCap, RotateCcw, Send, Sparkles, Star, X } from "lucide-react";
 import { AccessExpiredError, resetChatSession, sendChatMessage, sendFeedback, unlockAi, type AccessSession, type ChatMode, type SimulationControls } from "../services/chatApi";
 import { MessageBubble } from "./MessageBubble";
+import { HelpVideoModal } from "./HelpVideoModal";
 import type { ChatMessage, Language } from "./types";
 
 const content = {
@@ -29,6 +30,8 @@ export function ChatWidget({ access, onAccessChange, onExpired }: { access: Acce
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showFeedback, setShowFeedback] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
+  const [rating, setRating] = useState(0);
   const [feedback, setFeedback] = useState("");
   const [feedbackStatus, setFeedbackStatus] = useState("");
   const [sendingFeedback, setSendingFeedback] = useState(false);
@@ -100,9 +103,10 @@ export function ChatWidget({ access, onAccessChange, onExpired }: { access: Acce
   async function submitFeedback(event: FormEvent) {
     event.preventDefault(); setSendingFeedback(true); setFeedbackStatus("");
     try {
-      const result = await sendFeedback(sessionId, feedback, access.token);
+      const result = await sendFeedback(sessionId, rating, feedback, access.token);
       setFeedbackStatus(language === "en" ? `Thank you. We received your comment (${result.reference}).` : language === "pt" ? `Obrigado. Recebemos seu comentário (${result.reference}).` : `Gracias. Recibimos tu comentario (${result.reference}).`);
       setFeedback("");
+      setRating(0);
     } catch (reason) {
       if (reason instanceof AccessExpiredError) onExpired();
       else setFeedbackStatus(language === "en" ? "We could not send it. Please try again." : language === "pt" ? "Não foi possível enviar. Tente novamente." : "No pudimos enviarlo. Inténtalo nuevamente.");
@@ -115,6 +119,7 @@ export function ChatWidget({ access, onAccessChange, onExpired }: { access: Acce
         <div className="chat-header__icon"><GraduationCap size={24} /></div>
         <div className="chat-header__copy"><h1>Asistente de Aspirantes</h1><p>{t.subtitle}</p><small>{t.prototype}</small></div>
         <div className="header-actions">
+          <button className="help-trigger help-trigger--header" type="button" onClick={() => setShowHelp(true)} aria-label="Ver guía de uso" title="Ver guía de uso"><CircleHelp size={19} /></button>
           <div className="language-switch" aria-label="Idioma">{(["es", "en", "pt"] as Language[]).map((item) => <button key={item} type="button" className={language === item ? "is-active" : ""} onClick={() => changeLanguage(item)} disabled={isLoading}>{item.toUpperCase()}</button>)}</div>
           <div className="mode-switch" aria-label="Modo de respuesta"><button type="button" className={mode === "demo" ? "is-active" : ""} onClick={selectDemoMode} disabled={isLoading}>Demo</button><button type="button" className={mode === "ai" ? "is-active" : ""} onClick={selectAiMode} disabled={isLoading}>IA</button></div>
           <span className={`status ${mode === "ai" && aiError ? "is-error" : ""}`}>{mode === "ai" && aiError ? "IA offline" : "Online"}</span>
@@ -128,9 +133,10 @@ export function ChatWidget({ access, onAccessChange, onExpired }: { access: Acce
       <div className={`toolbar ${mode === "ai" ? "toolbar--ai" : ""}`}>{mode === "demo" && <div className="quick-prompts" aria-label="Escenarios demo">{t.prompts.map((prompt) => <button key={prompt} type="button" onClick={() => void submit(prompt)} disabled={isLoading}><Sparkles size={14} />{prompt}</button>)}</div>}<button className="reset-button" type="button" onClick={() => void reset()} disabled={isLoading} title={t.reset}><RotateCcw size={16} /><span>{t.reset}</span></button></div>
       <div className="messages" role="log" aria-live="polite">{messages.map((message) => <MessageBubble key={message.id} message={message} language={language} onAction={(value) => void submit(value)} />)}{isLoading && <div className="typing">{t.loading}</div>}<div ref={messagesEndRef} aria-hidden="true" /></div>
       {error && <div className="error">{error}</div>}
-      <form className="composer" onSubmit={onSubmit}><button className="feedback-trigger" type="button" onClick={() => { setFeedbackStatus(""); setShowFeedback(true); }} title="Ayúdanos a mejorar" aria-label="Ayúdanos a mejorar"><MessageCircle size={17} /></button><input value={input} onChange={(event) => setInput(event.target.value)} placeholder={t.placeholder} aria-label={t.placeholder} /><button className="send-button" type="submit" disabled={isLoading || !input.trim()} aria-label="Enviar"><Send size={18} /></button></form>
+      <form className="composer" onSubmit={onSubmit}><button className="feedback-trigger" type="button" onClick={() => { setFeedbackStatus(""); setShowFeedback(true); }} title="Califica tu experiencia" aria-label="Califica tu experiencia"><Star size={18} /></button><input value={input} onChange={(event) => setInput(event.target.value)} placeholder={t.placeholder} aria-label={t.placeholder} /><button className="send-button" type="submit" disabled={isLoading || !input.trim()} aria-label="Enviar"><Send size={18} /></button></form>
       {showAiUnlock && <div className="unlock-overlay" role="dialog" aria-modal="true" aria-labelledby="ai-unlock-title"><form className="unlock-card" onSubmit={authorizeAi}><h2 id="ai-unlock-title">Habilitar modo IA</h2><p>Ingresa el código adicional para utilizar la inteligencia artificial durante esta sesión.</p><label htmlFor="ai-code">Código de IA</label><input id="ai-code" type="password" value={aiCode} onChange={(event) => setAiCode(event.target.value)} autoComplete="off" required autoFocus />{aiUnlockError && <div className="access-error">{aiUnlockError}</div>}<div className="unlock-actions"><button type="button" onClick={() => setShowAiUnlock(false)}>Cancelar</button><button className="primary" type="submit" disabled={unlockingAi || aiCode.length < 8}>{unlockingAi ? "Validando..." : "Habilitar IA"}</button></div></form></div>}
-      {showFeedback && <div className="unlock-overlay" role="dialog" aria-modal="true" aria-labelledby="feedback-title"><form className="unlock-card feedback-card" onSubmit={submitFeedback}><button className="dialog-close" type="button" onClick={() => setShowFeedback(false)} aria-label="Cerrar"><X size={18} /></button><h2 id="feedback-title">Ayúdanos a mejorar</h2><p>Cuéntanos brevemente qué ocurrió. Enviaremos tu comentario al equipo; no incluyas datos sensibles.</p><label htmlFor="feedback-detail">Tu comentario</label><textarea id="feedback-detail" value={feedback} onChange={(event) => setFeedback(event.target.value)} maxLength={2000} rows={4} required autoFocus />{feedbackStatus && <div className="feedback-status" role="status">{feedbackStatus}</div>}<div className="unlock-actions"><button type="button" onClick={() => setShowFeedback(false)}>Cerrar</button><button className="primary" type="submit" disabled={sendingFeedback || feedback.trim().length < 3}>{sendingFeedback ? "Enviando..." : "Enviar comentario"}</button></div></form></div>}
+      {showFeedback && <div className="unlock-overlay" role="dialog" aria-modal="true" aria-labelledby="feedback-title"><form className="unlock-card feedback-card" onSubmit={submitFeedback}><button className="dialog-close" type="button" onClick={() => setShowFeedback(false)} aria-label="Cerrar"><X size={18} /></button><h2 id="feedback-title">Califica tu experiencia</h2><p>Selecciona de 1 a 5 estrellas. Si deseas, también puedes dejarnos un comentario; no incluyas datos sensibles.</p><fieldset className="rating-field"><legend>Tu calificación</legend><div className="star-rating">{[1, 2, 3, 4, 5].map((value) => <button key={value} type="button" className={value <= rating ? "is-selected" : ""} onClick={() => setRating(value)} aria-label={`${value} ${value === 1 ? "estrella" : "estrellas"}`} aria-pressed={rating === value}><Star size={28} fill={value <= rating ? "currentColor" : "none"} /></button>)}</div></fieldset><label htmlFor="feedback-detail">Comentario (opcional)</label><textarea id="feedback-detail" value={feedback} onChange={(event) => setFeedback(event.target.value)} maxLength={2000} rows={4} />{feedbackStatus && <div className="feedback-status" role="status">{feedbackStatus}</div>}<div className="unlock-actions"><button type="button" onClick={() => setShowFeedback(false)}>Cerrar</button><button className="primary" type="submit" disabled={sendingFeedback || rating === 0}>{sendingFeedback ? "Enviando..." : "Enviar calificación"}</button></div></form></div>}
+      {showHelp && <HelpVideoModal onClose={() => setShowHelp(false)} />}
       {failure && <div className="unlock-overlay" role="alertdialog" aria-modal="true" aria-labelledby="failure-title"><section className="unlock-card failure-card"><h2 id="failure-title">{failure.expired ? "Tu sesión finalizó" : "Hagamos una pausa"}</h2><p>{failure.expired ? "Por seguridad, el tiempo de acceso terminó. Vuelve a ingresar para continuar; tu solicitud no fue enviada." : "Lo sentimos, no pudimos completar esta respuesta. No mostraremos detalles técnicos, pero puedes intentarlo nuevamente o continuar con un asesor."}</p><div className="unlock-actions">{!failure.expired && <><button type="button" onClick={() => { setFailure(null); void submit("__alt_contacts__"); }}>Otros canales</button><button type="button" onClick={() => { setFailure(null); void reset("demo"); }}>Continuar en Demo</button><button className="primary" type="button" onClick={() => { setFailure(null); void submit("__retry_last__"); }}>Intentar nuevamente</button></>}{failure.expired && <button className="primary" type="button" onClick={onExpired}>Volver a ingresar</button>}</div></section></div>}
     </section></main>
   );

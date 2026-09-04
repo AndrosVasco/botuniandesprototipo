@@ -68,16 +68,17 @@ app.post("/api/session/reset", (req, res) => {
 app.post("/api/feedback", async (req, res) => {
   const claims = verifyToken(bearer(req.headers.authorization));
   if (!claims) return res.status(401).json({ error: "La sesión expiró." });
-  const { sessionId, detail } = req.body ?? {};
-  if (typeof sessionId !== "string" || !sessionId || typeof detail !== "string" || detail.trim().length < 3 || detail.length > 2000) {
-    return res.status(400).json({ error: "Cuéntanos brevemente qué podríamos mejorar." });
+  const { sessionId, rating, detail = "" } = req.body ?? {};
+  if (typeof sessionId !== "string" || !sessionId || !Number.isInteger(rating) || rating < 1 || rating > 5 || typeof detail !== "string" || detail.length > 2000) {
+    return res.status(400).json({ error: "Selecciona una calificación entre 1 y 5 estrellas." });
   }
   const reference = `AYUDA-${randomUUID().slice(0, 8).toUpperCase()}`;
-  const delivery = await sendInternalFeedback(reference, sessionId.slice(0, 100), detail.trim()).catch((error) => {
+  const delivery = await sendInternalFeedback(reference, sessionId.slice(0, 100), rating, detail.trim()).catch((error) => {
     console.error("No fue posible enviar el comentario", error);
     return { ok: false as const, reason: "delivery_failed" };
   });
-  return res.status(202).json({ ok: true, reference, delivered: delivery.ok });
+  if (!delivery.ok) return res.status(503).json({ error: "No fue posible enviar la calificación. Inténtalo nuevamente." });
+  return res.status(202).json({ ok: true, reference, delivered: true });
 });
 // Vercel administra el ciclo de vida HTTP. En local conservamos el servidor tradicional.
 if (!process.env.VERCEL) app.listen(port, () => console.log(`Backend listo en http://localhost:${port}`));
