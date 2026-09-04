@@ -70,12 +70,16 @@ export function ChatWidget({ access, onAccessChange, onExpired }: { access: Acce
       }
       setConversationContext(response.memory);
       setMessages((current) => {
-        const previousUser = [...current].reverse().find((item) => item.role === "user");
-        const previousAssistant = [...current].reverse().find((item) => item.role === "assistant");
+        const advisorMode = response.memory.advisorMode === true;
+        const visibleMessages = advisorMode
+          ? current.map((message) => ({ ...message, ui: withoutAdvisorActions(message.ui) }))
+          : current;
+        const previousUser = [...visibleMessages].reverse().find((item) => item.role === "user");
+        const previousAssistant = [...visibleMessages].reverse().find((item) => item.role === "assistant");
         const normalize = (value: string) => value.trim().toLocaleLowerCase().replace(/\s+/g, " ");
         const loopDetected = previousUser && previousAssistant && normalize(previousUser.content) === normalize(clean) && normalize(previousAssistant.content) === normalize(response.reply);
-        if (loopDetected) return [...current, recoveryMessage(language, true)];
-        return [...current, { id: crypto.randomUUID(), role: "assistant", content: response.reply, toolUsed: response.toolUsed, ui: mode === "ai" ? withAdvisorAction(response.ui, language, response.toolUsed) : response.ui }];
+        if (loopDetected) return [...visibleMessages, recoveryMessage(language, true)];
+        return [...visibleMessages, { id: crypto.randomUUID(), role: "assistant", content: response.reply, toolUsed: response.toolUsed, ui: mode === "ai" ? withAdvisorAction(response.ui, language, response.toolUsed, advisorMode) : response.ui }];
       });
     } catch (reason) {
       setFailure({ expired: reason instanceof AccessExpiredError });
@@ -132,12 +136,19 @@ export function ChatWidget({ access, onAccessChange, onExpired }: { access: Acce
   );
 }
 
-function withAdvisorAction(ui: ChatMessage["ui"], language: Language, toolUsed: string | null): ChatMessage["ui"] {
-  if (toolUsed === "checkAdvisorAvailability") return ui;
+function withAdvisorAction(ui: ChatMessage["ui"], language: Language, toolUsed: string | null, advisorMode: boolean): ChatMessage["ui"] {
+  if (advisorMode || toolUsed === "checkAdvisorAvailability") return withoutAdvisorActions(ui);
   const action = { label: language === "en" ? "Talk to an advisor" : language === "pt" ? "Falar com um assessor" : "Hablar con un asesor", message: language === "en" ? "I want to talk to Admissions" : language === "pt" ? "Quero falar com Admissões" : "Quiero hablar con Admisiones" };
   if (!ui) return { type: "actions", actions: [action] };
   if (ui.actions.some((item) => /advisor|asesor|assessor|admisiones|admissions|admissões/i.test(`${item.label} ${item.message}`))) return ui;
   return { ...ui, actions: [...ui.actions, action] };
+}
+
+function withoutAdvisorActions(ui: ChatMessage["ui"]): ChatMessage["ui"] {
+  if (!ui) return ui;
+  const actions = ui.actions.filter((item) => !/advisor|asesor|assessor|admisiones|admissions|admissões/i.test(`${item.label} ${item.message}`));
+  if (ui.type === "actions" && actions.length === 0) return null;
+  return { ...ui, actions };
 }
 
 function recoveryMessage(language: Language, loop: boolean): ChatMessage {
