@@ -33,6 +33,7 @@ export function ChatWidget({ access, onAccessChange, onExpired }: { access: Acce
   useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" }); }, [messages, isLoading]);
 
   async function submit(text = input, override: Partial<SimulationControls> = {}) {
+    if (text === "__open_enrollment_form__") { window.location.assign("/formulario-inscripcion"); return; }
     const retry = text === "__retry_ai__";
     const clean = retry ? t.retry : text.trim();
     if (!clean || isLoading) return;

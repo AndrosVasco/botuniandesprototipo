@@ -1,10 +1,12 @@
 import { FormEvent, useEffect, useState } from "react";
 import { GraduationCap, LockKeyhole } from "lucide-react";
 import { ChatWidget } from "./components/ChatWidget";
+import { EnrollmentForm } from "./components/EnrollmentForm";
 import { unlockApplication, type AccessSession } from "./services/chatApi";
 import "./styles.css";
 
 export default function App() {
+  if (window.location.pathname.replace(/\/$/, "") === "/formulario-inscripcion") return <EnrollmentForm />;
   const [session, setSession] = useState<AccessSession | null>(null);
   const [code, setCode] = useState(""); const [error, setError] = useState(""); const [loading, setLoading] = useState(false);
   useEffect(() => {

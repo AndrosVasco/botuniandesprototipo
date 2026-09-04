@@ -36,7 +36,7 @@ function dynamicProgramReply(name: string, memory: SessionMemory, cohortOverride
         ? { id: memory.programId, name, cohortOpen: true, period: "2027-1", deadline: "30 de novembro de 2026", requirements: ["Formulário de inscrição", "Documentos acadêmicos"], applicationSteps: ["Revisar as informações do curso", "Preencher o formulário de inscrição", "Revisar e enviar os dados", "Receber o resultado de admissão"], enrollmentSteps: ["Aceitar a vaga", "Revisar o valor da matrícula", "Abrir o link de pagamento", "Confirmar a matrícula"], studyStartSteps: ["Consultar o calendário acadêmico", "Revisar o guia de boas-vindas", "Selecionar disciplinas", "Iniciar as aulas na data programada"], costCop: 24000000, source: "Ficha acadêmica do curso", status: "Inscrições abertas" }
         : { id: memory.programId, name, cohortOpen: true, period: "2027-1", deadline: "30 de noviembre de 2026", requirements: ["Formulario de inscripción", "Documentos académicos"], applicationSteps: ["Revisar la información del programa", "Completar el formulario de inscripción", "Revisar y enviar los datos", "Recibir el resultado de admisión"], enrollmentSteps: ["Aceptar el cupo", "Revisar el valor de la matrícula", "Abrir el enlace de pago", "Confirmar la matrícula"], studyStartSteps: ["Consultar el calendario académico", "Revisar la guía de bienvenida", "Seleccionar materias", "Iniciar clases en la fecha programada"], costCop: 24000000, source: "Ficha académica del programa", status: "Admisiones abiertas" };
     const reply = language === "en" ? `**${name}** has an **available cohort** for the 2027-1 term.` : language === "pt" ? `**${name}** tem uma **turma disponível** para o período 2027-1.` : `**${name}** tiene una **cohorte abierta** para el periodo 2027-1.`;
-    const actions = language === "en" ? [{ label: "Register interest via WhatsApp", message: `Register interest via WhatsApp for ${name}`, variant: "primary" as const }, { label: "Talk to Admissions", message: "Talk to Admissions" }] : language === "pt" ? [{ label: "Registrar interesse por WhatsApp", message: `Registrar interesse por WhatsApp para ${name}`, variant: "primary" as const }, { label: "Falar com Admissões", message: "Falar com Admissões" }] : [{ label: "Registrar interés por WhatsApp", message: `Registrar interés por WhatsApp para ${name}`, variant: "primary" as const }, { label: "Hablar con Admisiones", message: "Hablar con Admisiones" }];
+    const actions = language === "en" ? [{ label: "Start application", message: "__open_enrollment_form__", variant: "primary" as const }, { label: "Register interest via WhatsApp", message: `Register interest via WhatsApp for ${name}` }, { label: "Talk to Admissions", message: "Talk to Admissions" }] : language === "pt" ? [{ label: "Iniciar inscrição", message: "__open_enrollment_form__", variant: "primary" as const }, { label: "Registrar interesse por WhatsApp", message: `Registrar interesse por WhatsApp para ${name}` }, { label: "Falar com Admissões", message: "Falar com Admissões" }] : [{ label: "Iniciar inscripción", message: "__open_enrollment_form__", variant: "primary" as const }, { label: "Registrar interés por WhatsApp", message: `Registrar interés por WhatsApp para ${name}` }, { label: "Hablar con Admisiones", message: "Hablar con Admisiones" }];
     return { reply, toolUsed: "consultProgram", ui: createProgramCard(program, actions) };
   }
   const reply = language === "en" ? `**${name}** currently has **no available cohort** or confirmed future date. You may register your interest to receive updates.` : language === "pt" ? `**${name}** não tem **turma disponível** nem data futura confirmada no momento. Você pode registrar interesse para receber novidades.` : `**${name}** no tiene **cohorte abierta** ni una fecha futura confirmada en este momento. Puedes registrar tu interés para recibir novedades.`;
@@ -105,7 +105,7 @@ function isControlledIntent(message: string) {
 async function aiConversation(sessionId: string, message: string, memory: SessionMemory, simulation: SimulationControls) {
   if (!openai) return localAiContextReply(memory, simulation);
   const result = await openai.chat.completions.create({ model, temperature: 0.35, messages: [
-    { role: "system", content: `Reply in ${languageName(memory.language)} as ${memory.advisorMode ? "a warm human Admissions advisor" : "a clear conversational admissions bot"} in a technical Universidad de los Andes prototype.
+    { role: "system", content: `Reply in ${languageName(memory.language)} as ${memory.advisorMode ? "Andrés, a warm human Admissions advisor" : "a clear conversational admissions bot"} in a technical Universidad de los Andes prototype.
 ${simulatedAcademicContext(memory, simulation)}
 Maintain the selected program and facts across turns. Answer only questions about programs, cohorts, requirements, admissions, registration, enrollment, tuition, payments, or Admissions contact. Present the supplied record naturally and confidently. Never mention simulation, fiction, demonstration, unofficial data, prototypes, or internal controls. Never add university facts, links, people, policies, dates, prices, promises, or admission decisions beyond the supplied record. Do not request identity documents or sensitive data. If no program is selected and the answer depends on one, ask which program. If information is absent, say it is not currently available. Be natural, concise, and helpful.` },
     ...getRecentMessages(sessionId, 7).slice(0, -1).map((item) => ({ role: item.role, content: item.content } as const)),
@@ -120,7 +120,7 @@ export async function handleChat(sessionId: string, message: string, mode: "demo
   addMessage(sessionId, { role: "user", content: message });
   const pending = memory.step !== "idle";
   const requestedCareer = extractRequestedCareer(message);
-  const hasAiConversationContext = mode === "ai" && (memory.currentProgramName !== null || memory.advisorMode);
+  const hasAiConversationContext = mode === "ai" && (memory.currentProgramName !== null || memory.advisorMode || getRecentMessages(sessionId, 2).length > 1);
   if (isOutOfScope(message) || (!pending && !hasAiConversationContext && !requestedCareer && !isAdmissionsRelated(message))) {
     const reply = scopeReplies[responseLanguage]; addMessage(sessionId, { role: "assistant", content: reply }); summarizeIntoMemory(sessionId);
     return { reply, memory, toolUsed: null, ui: null };
@@ -149,7 +149,8 @@ export async function handleChat(sessionId: string, message: string, mode: "demo
     if (!pending && (memory.advisorMode || !isControlledIntent(message))) {
       const reply = await aiConversation(sessionId, message, memory, simulation).catch(() => localAiContextReply(memory, simulation));
       addMessage(sessionId, { role: "assistant", content: reply }); summarizeIntoMemory(sessionId);
-      return { reply, memory, toolUsed: null, ui: null };
+      const ui = simulation.cohortOpen && currentProgram(memory) ? dynamicProgramReply(currentProgram(memory)!, memory, true).ui : null;
+      return { reply, memory, toolUsed: null, ui };
     }
   }
 
@@ -161,5 +162,8 @@ export async function handleChat(sessionId: string, message: string, mode: "demo
     catch (error) { console.error("OpenAI unavailable; using controlled local fallback", error); memory.useLocalFallback = true; }
   }
   addMessage(sessionId, { role: "assistant", content: reply }); summarizeIntoMemory(sessionId);
-  return { reply, memory, toolUsed: local.toolUsed, ui: local.ui ?? null };
+  const contextualUi = mode === "ai" && simulation.cohortOpen && currentProgram(memory) && (memory.advisorMode || !local.ui)
+    ? dynamicProgramReply(currentProgram(memory)!, memory, true).ui
+    : local.ui;
+  return { reply, memory, toolUsed: local.toolUsed, ui: contextualUi ?? null };
 }

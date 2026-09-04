@@ -165,7 +165,7 @@ export async function runFallbackAgent(message: string, memory: SessionMemory, m
       return { reply: mode === "demo" ? t.closed : offline, toolUsed: "checkAdvisorAvailability", ui: createActions([{ label: language === "en" ? "Leave contact request" : language === "pt" ? "Deixar solicitação" : "Dejar solicitud", message: language === "en" ? "Contact Admissions" : language === "pt" ? "Contatar Admissões" : "Contactar a Admisiones", variant: "primary" }]) };
     }
     memory.advisorMode = true;
-    return { reply: language === "en" ? "You are now connected with an **Admissions advisor**. I can clarify questions about programs, cohorts, requirements, costs, enrollment and payments." : language === "pt" ? "Agora você está conectado com um **assessor de Admissões**. Posso esclarecer dúvidas sobre cursos, turmas, requisitos, custos, matrícula e pagamentos." : "Ahora te atiendo como **asesor de Admisiones**. Puedo aclarar dudas sobre programas, cohortes, requisitos, costos, matrícula y pagos.", toolUsed: "checkAdvisorAvailability" };
+    return { reply: language === "en" ? "Hello, I’m **Andrés from Uniandes Admissions**. Tell me what you need and I’ll guide you through programs, enrollment and payment options." : language === "pt" ? "Olá, sou **Andrés, da equipe de Admissões Uniandes**. Conte o que você precisa e vou orientar sobre cursos, matrícula e opções de pagamento." : "Hola, soy **Andrés, de Admisiones Uniandes**. Cuéntame qué necesitas y te orientaré sobre programas, inscripción y opciones de pago.", toolUsed: "checkAdvisorAvailability" };
   }
   if (mode === "demo") {
     const reply = language === "en"

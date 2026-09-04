@@ -2,6 +2,7 @@
 * { box-sizing: border-box; }
 body { margin: 0; min-width: 320px; min-height: 100vh; }
 button, input { font: inherit; }
+select { font: inherit; }
 button { cursor: pointer; }
 .page-shell { min-height: 100vh; display: grid; place-items: center; padding: 24px; background: radial-gradient(circle at 12% 10%, rgba(39,116,110,.10), transparent 32%), #fafaf7; }
 .chat-widget { position: relative; width: min(920px, 100%); height: min(780px, calc(100vh - 48px)); display: flex; flex-direction: column; background: #fff; border: 1px solid #d8e1e3; border-radius: 12px; box-shadow: 0 22px 55px rgba(20,47,70,.14); overflow: hidden; }
@@ -81,4 +82,18 @@ button:disabled { cursor: not-allowed; opacity: .58; }
 .unlock-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; }
 .unlock-actions button { border: 1px solid #bdccd1; border-radius: 8px; padding: 9px 12px; background: #fff; color: #263238; }
 .unlock-actions button.primary { border-color: #27746e; background: #27746e; color: #fff; }
+.enrollment-shell { min-height: 100vh; padding: 32px 18px; background: radial-gradient(circle at 12% 10%, rgba(39,116,110,.10), transparent 32%), #fafaf7; }
+.enrollment-page { width: min(760px, 100%); margin: 0 auto; overflow: hidden; border: 1px solid #d8e1e3; border-radius: 14px; background: #fff; box-shadow: 0 22px 55px rgba(20,47,70,.14); }
+.enrollment-header { display: flex; align-items: center; gap: 12px; padding: 18px 22px; background: #142f46; color: #fff; }
+.enrollment-header > div { display: grid; place-items: center; width: 42px; height: 42px; border-radius: 10px; background: #27746e; }
+.enrollment-header span { display: grid; gap: 2px; }.enrollment-header small { color: #d9e5e8; }
+.demo-notice { display: grid; gap: 2px; margin: 20px 24px 0; padding: 12px 14px; border: 1px solid #ead58b; border-radius: 8px; background: #fff8dc; color: #624f18; font-size: .86rem; }
+.enrollment-copy { padding: 20px 24px 5px; }.enrollment-copy h1 { margin: 0 0 6px; color: #142f46; font-size: 1.5rem; }.enrollment-copy p { margin: 0; color: #60727a; }
+.enrollment-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; padding: 20px 24px; }
+.enrollment-form label { display: grid; gap: 6px; color: #263238; font-size: .82rem; font-weight: 700; }
+.enrollment-form input, .enrollment-form select { min-width: 0; padding: 11px 12px; border: 1px solid #bdccd1; border-radius: 8px; background: #fff; color: #263238; }
+.enrollment-form .enrollment-consent { grid-column: 1 / -1; display: flex; align-items: flex-start; font-weight: 500; }.enrollment-consent input { margin-top: 2px; }
+.enrollment-form > button { grid-column: 1 / -1; padding: 11px; border: 0; border-radius: 8px; background: #27746e; color: #fff; font-weight: 750; }
+.back-link { display: flex; align-items: center; gap: 6px; margin: 0 24px 24px; padding: 0; border: 0; background: transparent; color: #27746e; font-weight: 700; }
 @media (max-width: 720px) { .page-shell { padding: 0; } .chat-widget { height: 100vh; border: 0; border-radius: 0; } .chat-header { align-items: flex-start; padding: 13px; } .chat-header__icon { display: none; } .header-actions { gap: 5px; } .status { display: none; } .simulation-controls { justify-content: flex-start; overflow-x: auto; } .simulation-control { flex: 0 0 auto; } .toolbar { align-items: flex-start; } .reset-button span { display: none; } .program-card dl { grid-template-columns: 1fr; } }
+@media (max-width: 600px) { .enrollment-shell { padding: 0; }.enrollment-page { min-height: 100vh; border: 0; border-radius: 0; }.enrollment-form { grid-template-columns: 1fr; }.enrollment-form .enrollment-consent, .enrollment-form > button { grid-column: 1; } }
