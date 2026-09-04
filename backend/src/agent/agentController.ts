@@ -162,7 +162,8 @@ export async function handleChat(sessionId: string, message: string, mode: "demo
     catch (error) { console.error("OpenAI unavailable; using controlled local fallback", error); memory.useLocalFallback = true; }
   }
   addMessage(sessionId, { role: "assistant", content: reply }); summarizeIntoMemory(sessionId);
-  const contextualUi = mode === "ai" && simulation.cohortOpen && currentProgram(memory) && (memory.advisorMode || !local.ui)
+  const isAdvisorHandoff = local.toolUsed === "checkAdvisorAvailability" || memory.advisorMode;
+  const contextualUi = mode === "ai" && simulation.cohortOpen && currentProgram(memory) && !isAdvisorHandoff && !local.ui
     ? dynamicProgramReply(currentProgram(memory)!, memory, true).ui
     : local.ui;
   return { reply, memory, toolUsed: local.toolUsed, ui: contextualUi ?? null };

@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex,nofollow" />
+    <title>Formulario simulado de inscripción</title>
+    <style>
+      *{box-sizing:border-box}body{margin:0;min-width:320px;background:radial-gradient(circle at 12% 10%,rgba(39,116,110,.1),transparent 32%),#fafaf7;color:#263238;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif}.shell{min-height:100vh;padding:32px 18px}.page{width:min(760px,100%);margin:auto;overflow:hidden;border:1px solid #d8e1e3;border-radius:14px;background:#fff;box-shadow:0 22px 55px rgba(20,47,70,.14)}header{padding:20px 24px;background:#142f46;color:#fff}header strong{display:block;font-size:1.1rem}header small{color:#d9e5e8}.notice{display:grid;gap:3px;margin:20px 24px 0;padding:13px 14px;border:1px solid #ead58b;border-radius:8px;background:#fff8dc;color:#624f18}.copy{padding:20px 24px 4px}.copy h1{margin:0 0 7px;color:#142f46;font-size:1.5rem}.copy p{margin:0;color:#60727a}.form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;padding:20px 24px}.form label{display:grid;gap:6px;font-size:.82rem;font-weight:700}.form input,.form select{min-width:0;padding:11px 12px;border:1px solid #bdccd1;border-radius:8px;background:#f7f9f8;color:#60727a}.consent{grid-column:1/-1;display:flex!important;align-items:flex-start;font-weight:500!important}.consent input{margin-top:2px}.form button{grid-column:1/-1;padding:11px;border:0;border-radius:8px;background:#9aa9ae;color:#fff;font-weight:750;cursor:not-allowed}.back{display:inline-block;margin:0 24px 24px;color:#27746e;font-weight:700;text-decoration:none}@media(max-width:600px){.shell{padding:0}.page{min-height:100vh;border:0;border-radius:0}.form{grid-template-columns:1fr}.consent,.form button{grid-column:1}}
+    </style>
+  </head>
+  <body>
+    <main class="shell"><section class="page">
+      <header><strong>Formulario de inscripción</strong><small>Prototipo de Admisiones</small></header>
+      <div class="notice"><strong>Formulario exclusivamente simulado</strong><span>No envía, almacena ni procesa ningún dato. Todos sus controles están deshabilitados.</span></div>
+      <div class="copy"><h1>Inicia tu proceso de admisión</h1><p>Esta pantalla permite visualizar cómo sería el recorrido de inscripción.</p></div>
+      <form class="form" aria-disabled="true">
+        <label>Nombre completo<input type="text" placeholder="Escribe tu nombre" disabled /></label>
+        <label>Correo electrónico<input type="email" placeholder="nombre@correo.com" disabled /></label>
+        <label>Número de celular<input type="tel" placeholder="+57 300 123 4567" disabled /></label>
+        <label>Programa de interés<select disabled><option>Selecciona un programa</option><option>Medicina</option><option>Ingeniería de Sistemas</option><option>Diseño</option></select></label>
+        <label>Periodo de ingreso<select disabled><option>2027-1</option></select></label>
+        <label class="consent"><input type="checkbox" disabled /> Autorización de tratamiento de datos (simulada).</label>
+        <button type="button" disabled>Enviar inscripción (simulación)</button>
+      </form>
+      <a class="back" href="/">&larr; Volver al asistente</a>
+    </section></main>
+  </body>
+</html>

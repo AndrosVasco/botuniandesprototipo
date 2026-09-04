@@ -9,6 +9,7 @@ const content = {
   en: { subtitle: "Information about programs and admissions", prototype: "Technical prototype · Simulated information", welcome: "Hello. I can guide you through programs, cohorts, and admissions processes.", prompts: ["I want to check a program and its dates.", "I want to know whether a cohort is available.", "I want to talk to Admissions."], placeholder: "Type your message...", loading: "Checking...", reset: "Restart conversation", advisor: "Admissions", cohort: "Cohort", engine: "AI connection", online: "Online", offline: "Offline", available: "Available", unavailable: "Unavailable", connected: "Connected", error: "Simulate error", retry: "Retry AI" },
   pt: { subtitle: "Informações sobre programas e admissões", prototype: "Protótipo técnico · Informações simuladas", welcome: "Olá. Posso orientar sobre cursos, turmas e processos de admissão.", prompts: ["Quero consultar um programa e suas datas.", "Quero saber se há uma turma disponível.", "Quero falar com Admissões."], placeholder: "Digite sua mensagem...", loading: "Consultando...", reset: "Reiniciar conversa", advisor: "Admissões", cohort: "Turma", engine: "Conexão IA", online: "Online", offline: "Offline", available: "Disponível", unavailable: "Indisponível", connected: "Conectada", error: "Simular erro", retry: "Tentar IA novamente" }
 } as const;
+const ENROLLMENT_URL = import.meta.env.PROD ? "https://botuniandesprototipo-frontend.vercel.app/formulario-inscripcion" : "/formulario-inscripcion";
 
 export function ChatWidget({ access, onAccessChange, onExpired }: { access: AccessSession; onAccessChange: (session: AccessSession) => void; onExpired: () => void }) {
   const [sessionId, setSessionId] = useState(() => `aspirantes-${crypto.randomUUID()}`);
@@ -38,7 +39,7 @@ export function ChatWidget({ access, onAccessChange, onExpired }: { access: Acce
   useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" }); }, [messages, isLoading]);
 
   async function submit(text = input, override: Partial<SimulationControls> = {}) {
-    if (text === "__open_enrollment_form__") { window.location.assign("/formulario-inscripcion"); return; }
+    if (text === "__open_enrollment_form__") { window.location.assign(ENROLLMENT_URL); return; }
     if (text === "__feedback__") { setFeedbackStatus(""); setShowFeedback(true); return; }
     if (text === "__alt_contacts__") {
       setMessages((current) => [...current, { id: crypto.randomUUID(), role: "assistant", content: language === "en" ? "Alternative demo channels:\n\nPhone: **+57 601 555 0100**\nEmail: **admisiones@demo.invalid**\nHours: Monday to Friday, 8:00 a.m. to 5:00 p.m." : language === "pt" ? "Canais alternativos de demonstração:\n\nTelefone: **+57 601 555 0100**\nE-mail: **admisiones@demo.invalid**\nHorário: segunda a sexta, das 8h às 17h." : "Canales alternos de demostración:\n\nTeléfono: **+57 601 555 0100**\nCorreo: **admisiones@demo.invalid**\nHorario: lunes a viernes, de 8:00 a. m. a 5:00 p. m.", ui: { type: "actions", actions: [{ label: language === "en" ? "Request an advisor" : language === "pt" ? "Solicitar assessor" : "Solicitar un asesor", message: language === "en" ? "Contact Admissions" : language === "pt" ? "Contatar Admissões" : "Contactar a Admisiones", variant: "primary" }] } }]);
