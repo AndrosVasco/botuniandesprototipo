@@ -247,16 +247,24 @@ export default function App() {
     const carousel = carouselRef.current;
     if (!carousel) return;
     const cards = Array.from(carousel.querySelectorAll<HTMLElement>(".experience-card"));
+    const carouselLeft = carousel.getBoundingClientRect().left;
     const closest = cards.reduce((best, card, index) =>
-      Math.abs(card.offsetLeft - carousel.scrollLeft) < Math.abs(cards[best].offsetLeft - carousel.scrollLeft) ? index : best, 0);
+      Math.abs(card.getBoundingClientRect().left - carouselLeft) < Math.abs(cards[best].getBoundingClientRect().left - carouselLeft) ? index : best, 0);
     setCarouselPosition(closest);
   };
 
   const moveCarousel = (direction: number) => {
     const carousel = carouselRef.current;
     if (!carousel) return;
-    const card = carousel.querySelector<HTMLElement>(".experience-card");
-    carousel.scrollBy({ left: direction * ((card?.offsetWidth ?? carousel.clientWidth) + 20), behavior: "smooth" });
+    const cards = Array.from(carousel.querySelectorAll<HTMLElement>(".experience-card"));
+    const carouselLeft = carousel.getBoundingClientRect().left;
+    const current = cards.reduce((best, card, index) =>
+      Math.abs(card.getBoundingClientRect().left - carouselLeft) < Math.abs(cards[best].getBoundingClientRect().left - carouselLeft) ? index : best, 0);
+    const targetIndex = Math.max(0, Math.min(cards.length - 1, current + direction));
+    const target = cards[targetIndex];
+    const targetLeft = carousel.scrollLeft + target.getBoundingClientRect().left - carouselLeft;
+    carousel.scrollTo({ left: targetLeft, behavior: "smooth" });
+    setCarouselPosition(targetIndex);
   };
 
   const closeMenu = () => setMenuOpen(false);
@@ -421,7 +429,6 @@ export default function App() {
                   <div className="experience-card__logo"><OrganizationLogo organization={organization} lazy /></div>
                   <span>0{index + 1}</span>
                 </div>
-                <h3>{organization.name}</h3>
                 <dl>
                   <div><dt>Participación</dt><dd>{organization.participation}</dd></div>
                   <div><dt>Aporte</dt><dd>{organization.contribution}</dd></div>

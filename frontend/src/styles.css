@@ -126,8 +126,7 @@ section[id] { scroll-margin-top: 88px; }
 .full-stack-logo { display: inline-grid; place-items: center; width: 76px; height: 58px; border-radius: 14px; background: var(--green); color: var(--mustard); font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 1.25rem; font-weight: 800; letter-spacing: -.08em; }
 .experience-card:nth-child(1) .experience-card__logo > img { max-width: 130px; }
 .experience-card:nth-child(5) .experience-card__logo > img { max-width: 120px; }
-.experience-card h3 { margin: 31px 0 24px; color: var(--green); font-family: Georgia, "Times New Roman", serif; font-size: 1.55rem; }
-.experience-card dl { display: grid; gap: 22px; margin: 0; }
+.experience-card dl { display: grid; gap: 22px; margin: 28px 0 0; }
 .experience-card dl div { display: grid; gap: 7px; }
 .experience-card dt { color: #72601f; font-size: .67rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
 .experience-card dd { margin: 0; color: var(--muted); line-height: 1.58; }
@@ -300,7 +299,7 @@ section[id] { scroll-margin-top: 88px; }
 .experience { background: #efeadd; overflow: hidden; }
 .experience-carousel { display: flex; gap: 20px; margin-right: min(-5vw, -24px); padding: 4px max(15vw, 190px) 24px 0; overflow-x: auto; overscroll-behavior-inline: contain; scroll-snap-type: x mandatory; scrollbar-width: none; }
 .experience-carousel::-webkit-scrollbar { display: none; }
-.experience-card { flex: 0 0 min(42vw, 560px); min-height: 0; padding: 34px; border: 0; border-radius: 22px; background: #fffdf7; scroll-snap-align: start; box-shadow: 0 10px 30px rgba(11, 41, 34, .06); }
+.experience-card { flex: 0 0 min(42vw, 560px); min-height: 0; padding: 34px; border: 0; border-radius: 22px; background: #fffdf7; scroll-snap-align: start; scroll-snap-stop: always; box-shadow: 0 10px 30px rgba(11, 41, 34, .06); }
 .experience-card dl { margin-bottom: 28px; }
 .experience-card > a { margin-top: 0; }
 .carousel-controls { display: flex; align-items: center; justify-content: space-between; margin-top: 18px; }
@@ -367,8 +366,8 @@ section[id] { scroll-margin-top: 88px; }
   .solution-chapter__mobile-graphic .flow-graphic { margin: 0; }
   .solution-chapter h3 { font-size: 2rem; }
   .tool-line { margin-top: 20px; }
-  .experience-carousel { margin-right: -22px; padding-right: 55px; }
-  .experience-card { flex-basis: calc(100vw - 62px); padding: 28px 22px; }
+  .experience-carousel { margin-right: -22px; padding-right: 22px; scroll-padding-inline: 0 22px; }
+  .experience-card { flex-basis: calc(100% - 22px); padding: 28px 22px; }
   .carousel-controls { margin-top: 12px; }
   .carousel-progress i { width: 9px; }
   .carousel-progress i.is-active { width: 22px; }
