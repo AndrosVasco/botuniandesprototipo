@@ -259,6 +259,7 @@ export default function App() {
         </button>
         <nav id="main-navigation" className={menuOpen ? "nav is-open" : "nav"} aria-label="Navegación principal">
           <a href="#soluciones" onClick={closeMenu}>Soluciones</a>
+          <a href="#experiencia" onClick={closeMenu}>Experiencia que respalda</a>
           <a href="#sobre-mi" onClick={closeMenu}>Sobre mí</a>
           <a href="#proceso" onClick={closeMenu}>Cómo trabajamos</a>
           <a className="button button--small" href={generalWhatsapp} target="_blank" rel="noreferrer" onClick={closeMenu}>
@@ -273,7 +274,7 @@ export default function App() {
           <div className="hero__spark hero__spark--two" aria-hidden="true" />
           <div className="hero__copy reveal">
             <p className="eyebrow"><Sparkles size={16} /> La chispa de la transformación digital</p>
-            <h1>Mejora tu atención.<br />Automatiza tareas.<br /><em>Conecta tu negocio.</em></h1>
+            <h1>Mejora tu atención,<br />Automatiza tareas,<br /><em>Conecta tu negocio.</em></h1>
             <p className="hero__lead">
               Te ayudo a organizar tu atención al cliente y simplificar tu operación con soluciones digitales adaptadas a tu negocio. Desde una mejora puntual hasta una implementación completa.
             </p>
@@ -372,7 +373,7 @@ export default function App() {
           </div>
         </section>
 
-        <section className="experience section" aria-labelledby="experience-title">
+        <section className="experience section" id="experiencia" aria-labelledby="experience-title">
           <div className="section-heading section-heading--split">
             <div>
               <p className="eyebrow eyebrow--dark">Experiencia profesional</p>
