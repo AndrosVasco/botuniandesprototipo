@@ -1,106 +1,44 @@
-# Asistente de Aspirantes — prototipo técnico
+# MONTOYADIGITALBOND
 
-Adaptación breve del widget existente a un asistente web de programas y admisiones. Toda la información académica, disponibilidad y actividad de contacto es simulada; no se usan logos ni datos oficiales de la Universidad de los Andes.
+Landing comercial de Andrés Montoya Vélez para servicios de atención al cliente, automatización e integraciones.
 
-## Stack y alcance
+## Stack
 
-- React + Vite + TypeScript.
-- Express + TypeScript.
-- Modos Demo e IA, con OpenAI consumido solamente desde backend.
-- Fallback local controlado y memoria por `sessionId`.
-- Idiomas ES, EN y PT.
-- Tres programas simulados: Ingeniería de Sistemas, Diseño y Programa Especial.
-- Seis herramientas internas: `consultProgram`, `checkCohort`, `registerInterest`, `checkAdvisorAvailability`, `requestAdvisorContact` y `cancelInterest`.
+- React 19 + TypeScript.
+- Vite 6.
+- CSS nativo y `lucide-react` para iconografía.
+- Sitio completamente estático: no requiere backend, base de datos ni variables de entorno.
 
-No incluye base de datos, autenticación, RAG, analítica, CRM, mensajería ni llamadas reales. El canal y flujo internos son `web` y `aspirantes`.
-
-## Comportamiento por modo
-
-- **Demo:** Admisiones aparece cerrado con horario simulado de lunes a viernes, 8:00 a. m. a 5:00 p. m., y permite dejar una solicitud de contacto.
-- **IA:** el asistente conversa como bot sobre temas del prototipo. Puede consultar una carrera escrita por el usuario; para demostrar ambos estados, la primera consulta de esa carrera muestra cohorte simulada abierta y la segunda muestra que no hay cohorte ni fecha confirmada.
-- En modo IA, el backend detecta ES, EN o PT a partir de cada mensaje y conserva ese idioma durante respuestas cortas del mismo flujo, aunque el selector estuviera en otro idioma.
-- Al solicitar Admisiones en modo IA, la sesión cambia a una experiencia de asesor humano simulado, limitada a carreras, admisiones, requisitos, costos, cohortes, matrícula y pagos del prototipo.
-- La matrícula genera solo un identificador `MATR-DEMO`; los enlaces de pago usan el dominio reservado `demo.invalid` y no ejecutan cobros.
-- Cualquier pregunta fuera del alcance se bloquea en backend antes de llamar a OpenAI.
-
-Al activar **IA**, la interfaz muestra tres controles de demostración:
-
-- Admisiones `Online / Offline`.
-- Cohorte `Disponible / No disponible`.
-- Conexión IA `Conectada / Simular error`.
-
-El error controlado no llama a OpenAI y ofrece reintentar, volver más tarde o usar el teléfono y correo ficticios de demostración. Al pulsar **Reintentar IA**, el frontend restablece la conexión simulada antes de enviar el nuevo intento.
-
-La interfaz también detecta una respuesta consecutiva repetida ante la misma solicitud. En ese caso interrumpe el ciclo, ofrece un nuevo intento, muestra canales alternos ficticios y permite enviar un comentario mediante **Ayúdanos a mejorar**. Los comentarios se remiten a `FEEDBACK_EMAIL` cuando SMTP está configurado; sin esa variable, el endpoint conserva el comportamiento de demostración y devuelve una referencia sin afirmar entrega real.
-
-Al habilitar IA aparece una recomendación predictiva expresamente identificada como parte del prototipo, basada en actividad anterior simulada sobre Medicina, con opciones para consultar el programa o contactar a un asesor.
-
-## Ejecución
+## Desarrollo
 
 Requiere Node.js 20 o superior.
 
 ```powershell
-npm run install:all
+npm install
 npm run dev
 ```
 
-- Frontend: `http://localhost:5173`
-- Backend: `http://localhost:3001`
-- Salud: `GET http://localhost:3001/api/health`
-- Chat: `POST http://localhost:3001/api/chat`
+La aplicación se sirve por defecto en `http://127.0.0.1:5173`.
 
-El modo Demo no requiere configuración. Para IA, crea `backend/.env` a partir de `backend/.env.example` y configura `OPENAI_API_KEY`; si no existe o el proveedor falla, el recorrido continúa mediante fallback local.
-
-```env
-OPENAI_API_KEY=tu-api-key
-OPENAI_MODEL=gpt-4.1-mini
-APP_ACCESS_CODE=tu-codigo-privado-de-acceso
-AI_ACCESS_CODE=tu-codigo-privado-para-ia
-AUTH_SECRET=un-secreto-aleatorio-largo-para-firmar-sesiones
-PORT=3001
-CORS_ORIGIN=http://localhost:5173
-```
-
-SMTP es opcional. Sin SMTP, el registro por correo finaliza correctamente como simulación. Todo correo emitido incluye `PROTOTIPO TÉCNICO — MENSAJE DE DEMOSTRACIÓN`.
-
-## Recorridos de demostración
-
-1. `Quiero consultar un programa y sus fechas.` muestra una tarjeta única de Ingeniería de Sistemas.
-2. `Quiero saber si hay una cohorte disponible.` informa que Diseño no tiene cohorte ni fecha confirmada y permite registrar interés con autorización.
-3. `Programa Especial` muestra información no disponible con opciones para reintentar o contactar a Admisiones.
-
-`Quiero hablar con Admisiones.` demuestra la disponibilidad y transferencia simuladas. `Genera una tesis.` valida el límite de alcance en backend antes de ejecutar herramientas o llamar a OpenAI. `Simular falla` permite comprobar el manejo seguro de una acción fallida.
-
-Las tarjetas con cohorte disponible incluyen requisitos y tres secuencias demostrativas: postulación, registro/matrícula e inicio de estudios. Ningún paso crea una inscripción, matrícula o pago real.
-
-## Scripts
+## Validación y build
 
 ```powershell
-npm run dev
-npm run dev:backend
-npm run dev:frontend
 npm run build
-npm run start
+npm run preview
 ```
 
-## Notas para Vercel
+El resultado se genera en `frontend/dist`.
 
-No se ha realizado ningún despliegue. El frontend admite `VITE_API_URL`; en producción usa rutas relativas si no se define. La memoria y los registros simulados viven en RAM y pueden reiniciarse cuando una función serverless cambia de instancia o entra en reposo. Esto es deliberado para el prototipo y no debe considerarse persistencia.
+## Despliegue en Vercel
 
-Los procesos actuales operan sobre solo tres registros fijos. Si el catálogo o los registros se llevaran a persistencia real, las consultas deberán paginarse y cualquier carga masiva deberá usar encabezado de proceso, lotes reintentables de aproximadamente 300–500 elementos y consolidación posterior.
+El archivo `vercel.json` conserva el despliegue desde la raíz del repositorio, ejecuta el build del workspace frontend y publica `frontend/dist`. La URL canónica configurada es `https://www.montoyadigitalbond.com/`.
 
-## Seguridad
+No se necesitan las credenciales del prototipo anterior. Cualquier variable histórica puede retirarse manualmente desde Vercel cuando se confirme que no la usa otro entorno; este repositorio no la expone ni la consume.
 
-- Las claves y credenciales se leen únicamente en backend.
-- `.env` debe permanecer fuera de Git; solo se versiona `.env.example`.
-- El frontend no incluye ni recibe la API key.
-- No se solicita identificación ni datos personales para consultar programas.
-- Se solicita autorización antes de registrar cualquier dato de contacto.
+## Recursos visuales
 
-## Acceso temporal
+Las imágenes originales entregadas se conservan en `frontend/public/images` y sus versiones WebP optimizadas son las que usa la landing. La imagen social está preparada a 1200 × 630 px.
 
-La aplicación exige un código inicial y un segundo código para habilitar IA. Ambos se validan exclusivamente en backend mediante `APP_ACCESS_CODE` y `AI_ACCESS_CODE`; nunca deben usar el prefijo `VITE_` ni escribirse en el frontend. `AUTH_SECRET` firma el token temporal.
+## Respaldo
 
-La sesión expira cinco minutos después del acceso inicial. Habilitar IA no reinicia ni amplía ese plazo. El frontend conserva el token solo en memoria y el backend protege `/api/chat` y `/api/session/reset`, por lo que ocultar la pantalla no es la única barrera. Los intentos fallidos tienen un límite básico por instancia.
-
-En Vercel, agrega las tres variables en **Settings → Environment Variables** para Production y Preview y vuelve a desplegar. Si faltan, el backend devuelve `Acceso temporal no configurado` sin permitir el ingreso.
+El estado anterior a la transformación se conserva en la rama local `backup/pre-montoyadigitalbond-20261007`.
