@@ -156,7 +156,29 @@ const collaborations = [
   },
 ];
 
+const experienceItems = [
+  ...collaborations,
+  {
+    name: "Tigo Colombia",
+    logo: "/logos/tigo.svg",
+    participation: "Product Owner de bots y Zendesk durante 5 años.",
+    contribution: "Liderazgo end-to-end de productos digitales y equipos multidisciplinarios, con foco en adopción, eficiencia y experiencia del cliente. Escalé el canal de 900 a 915.000 conversaciones mensuales y elevé la resolución de los bots del 33 % al 65 %.",
+    url: "https://www.tigo.com.co/",
+  },
+  {
+    name: "Background desarrollador full stack",
+    logo: "full-stack",
+    participation: "Desarrollador full stack durante 5 años.",
+    contribution: "Construcción y evolución de soluciones digitales de principio a fin, conectando interfaces, lógica de negocio, APIs, bases de datos e integraciones con una visión práctica de producto.",
+    url: "",
+  },
+];
+
 function OrganizationLogo({ organization, lazy = false }: { organization: typeof collaborations[number]; lazy?: boolean }) {
+  if (organization.logo === "full-stack") {
+    return <span className="full-stack-logo" role="img" aria-label="Desarrollo full stack">&lt;/&gt;</span>;
+  }
+
   if (organization.logo === "mic-group") {
     return (
       <span className="mic-logo" role="img" aria-label="MIC, Little MIC y Movies">
@@ -393,7 +415,7 @@ export default function App() {
             role="region"
             aria-label="Proyectos y organizaciones; usa las flechas izquierda y derecha para recorrer"
           >
-            {collaborations.map((organization, index) => (
+            {experienceItems.map((organization, index) => (
               <article className="experience-card" key={organization.name}>
                 <div className="experience-card__head">
                   <div className="experience-card__logo"><OrganizationLogo organization={organization} lazy /></div>
@@ -404,21 +426,23 @@ export default function App() {
                   <div><dt>Participación</dt><dd>{organization.participation}</dd></div>
                   <div><dt>Aporte</dt><dd>{organization.contribution}</dd></div>
                 </dl>
-                <a href={organization.url} target="_blank" rel="noreferrer" aria-label={`Visitar el sitio de ${organization.name}`}>
-                  Visitar sitio <ExternalLink size={15} />
-                </a>
+                {organization.url && (
+                  <a href={organization.url} target="_blank" rel="noreferrer" aria-label={`Visitar el sitio de ${organization.name}`}>
+                    Visitar sitio <ExternalLink size={15} />
+                  </a>
+                )}
               </article>
             ))}
           </div>
           <div className="carousel-controls">
             <div className="carousel-arrows">
               <button type="button" onClick={() => moveCarousel(-1)} disabled={carouselPosition === 0} aria-label="Ver organización anterior"><ChevronLeft /></button>
-              <button type="button" onClick={() => moveCarousel(1)} disabled={carouselPosition === collaborations.length - 1} aria-label="Ver organización siguiente"><ChevronRight /></button>
+              <button type="button" onClick={() => moveCarousel(1)} disabled={carouselPosition === experienceItems.length - 1} aria-label="Ver experiencia siguiente"><ChevronRight /></button>
             </div>
             <div className="carousel-progress" aria-live="polite">
               <span>0{carouselPosition + 1}</span>
-              <div>{collaborations.map((organization, index) => <i key={organization.name} className={carouselPosition === index ? "is-active" : ""} />)}</div>
-              <span>0{collaborations.length}</span>
+              <div>{experienceItems.map((organization, index) => <i key={organization.name} className={carouselPosition === index ? "is-active" : ""} />)}</div>
+              <span>0{experienceItems.length}</span>
             </div>
           </div>
         </section>

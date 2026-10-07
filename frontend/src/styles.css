@@ -123,6 +123,7 @@ section[id] { scroll-margin-top: 88px; }
 .experience-card__head > span { color: #72601f; font-size: .72rem; font-weight: 700; letter-spacing: .12em; }
 .experience-card__logo { display: grid; align-items: center; width: 170px; height: 74px; }
 .experience-card__logo > img, .experience-card__logo .mic-logo { width: 100%; max-width: 165px; max-height: 68px; object-fit: contain; object-position: left center; }
+.full-stack-logo { display: inline-grid; place-items: center; width: 76px; height: 58px; border-radius: 14px; background: var(--green); color: var(--mustard); font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 1.25rem; font-weight: 800; letter-spacing: -.08em; }
 .experience-card:nth-child(1) .experience-card__logo > img { max-width: 130px; }
 .experience-card:nth-child(5) .experience-card__logo > img { max-width: 120px; }
 .experience-card h3 { margin: 31px 0 24px; color: var(--green); font-family: Georgia, "Times New Roman", serif; font-size: 1.55rem; }
