@@ -26,7 +26,7 @@ section[id] { scroll-margin-top: 88px; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 .skip-link { position: fixed; top: 8px; left: 8px; z-index: 100; padding: 10px 14px; background: var(--mustard); color: var(--charcoal); font-weight: 700; transform: translateY(-150%); }
 .skip-link:focus-visible { transform: translateY(0); }
-.site-shell { overflow: hidden; }
+.site-shell { overflow-x: clip; overflow-y: visible; }
 .section { padding: 112px max(5vw, 24px); }
 
 .site-header { position: absolute; inset: 0 0 auto; z-index: 20; display: flex; align-items: center; justify-content: space-between; width: min(1400px, calc(100% - 10vw)); margin: 0 auto; padding: 24px 0; color: var(--ivory); border-bottom: 1px solid rgba(246, 243, 234, .17); }
