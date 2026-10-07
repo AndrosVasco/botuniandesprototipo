@@ -26,6 +26,19 @@ const generalWhatsapp = whatsappUrl(
   "Hola Andrés, vi MONTOYADIGITALBOND y quiero conversar sobre una mejora para mi negocio.",
 );
 
+type Organization = {
+  name: string;
+  logo: string;
+  participation: string;
+  contribution: string;
+  url: string;
+  testimonial?: {
+    text: string;
+    name: string;
+    role: string;
+  };
+};
+
 const needs = [
   {
     id: "atencion",
@@ -111,7 +124,7 @@ const hiring = [
   },
 ];
 
-const collaborations = [
+const collaborations: Organization[] = [
   {
     name: "Vanti",
     logo: "/logos/vanti.webp",
@@ -138,6 +151,11 @@ const collaborations = [
     logo: "mic-group",
     participation: "Mejora continua de flujos en Zendesk.",
     contribution: "Organización y automatización de la gestión de solicitudes para facilitar el trabajo del equipo.",
+    testimonial: {
+      text: "Para mí ha sido muy grato trabajar contigo. Destaco especialmente tu profesionalismo, compromiso, responsabilidad y la calidad humana con la que asumes cada proyecto. Has demostrado ser una persona confiable, con muy buena disposición y enfocada en entregar siempre un trabajo de calidad.",
+      name: "Claudia Yaneth",
+      role: "Jefe de Operaciones · MIC",
+    },
     url: "https://www.mic.com.co/",
   },
   {
@@ -156,7 +174,7 @@ const collaborations = [
   },
 ];
 
-const experienceItems = [
+const experienceItems: Organization[] = [
   ...collaborations,
   {
     name: "Tigo Colombia",
@@ -174,7 +192,7 @@ const experienceItems = [
   },
 ];
 
-function OrganizationLogo({ organization, lazy = false }: { organization: typeof collaborations[number]; lazy?: boolean }) {
+function OrganizationLogo({ organization, lazy = false }: { organization: Organization; lazy?: boolean }) {
   if (organization.logo === "full-stack") {
     return <span className="full-stack-logo" role="img" aria-label="Desarrollo full stack">&lt;/&gt;</span>;
   }
@@ -433,6 +451,16 @@ export default function App() {
                   <div><dt>Participación</dt><dd>{organization.participation}</dd></div>
                   <div><dt>Aporte</dt><dd>{organization.contribution}</dd></div>
                 </dl>
+                {organization.testimonial && (
+                  <div className="experience-testimonial">
+                    <span className="experience-testimonial__quote" aria-hidden="true">“</span>
+                    <blockquote>{organization.testimonial.text}</blockquote>
+                    <p className="experience-testimonial__author">
+                      <strong>{organization.testimonial.name}</strong>
+                      <span>{organization.testimonial.role}</span>
+                    </p>
+                  </div>
+                )}
                 {organization.url && (
                   <a href={organization.url} target="_blank" rel="noreferrer" aria-label={`Visitar el sitio de ${organization.name}`}>
                     Visitar sitio <ExternalLink size={15} />
