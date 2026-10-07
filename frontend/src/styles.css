@@ -139,10 +139,18 @@ section[id] { scroll-margin-top: 88px; }
 .experience-testimonial__author span { color: var(--muted); }
 
 .about { display: grid; grid-template-columns: 1.05fr .95fr; min-height: 700px; background: var(--green); color: var(--ivory); }
-.about__visual { display: grid; place-items: center; min-width: 0; min-height: 520px; overflow: hidden; background: #061d18; }
-.about__visual img { display: block; width: 100%; height: 100%; object-fit: contain; object-position: center; }
+.about__visual { position: relative; display: flex; flex-direction: column; justify-content: center; min-width: 0; min-height: 520px; padding: clamp(48px, 6vw, 96px); overflow: hidden; background: radial-gradient(circle at 85% 22%, rgba(233, 173, 36, .14), transparent 28%), linear-gradient(145deg, #061d18, #0b3027); }
+.about__visual::before { position: absolute; top: 9%; right: -12%; width: 54%; aspect-ratio: 1; content: ""; border: 1px solid rgba(233, 173, 36, .32); border-radius: 50%; }
+.about__visual::after { position: absolute; right: 12%; bottom: 15%; width: 10px; height: 10px; content: ""; border-radius: 50%; background: var(--mustard); box-shadow: 0 0 0 10px rgba(233, 173, 36, .08); }
+.about__manifesto { position: relative; z-index: 1; }
+.about__manifesto > p { margin: 0 0 28px; color: var(--ivory); font-size: .72rem; font-weight: 700; letter-spacing: .32em; }
+.about__manifesto h2 { max-width: 680px; color: var(--mustard); font-size: clamp(3.2rem, 5.4vw, 6.2rem); line-height: .93; }
+.about__manifesto h2 em { font-weight: inherit; }
+.about__manifesto > span { display: block; margin-top: 30px; color: rgba(246, 243, 234, .82); font-size: clamp(.85rem, 1.2vw, 1.05rem); letter-spacing: .02em; }
+.about__sparkline { position: absolute; right: clamp(36px, 5vw, 76px); bottom: clamp(32px, 5vw, 70px); left: clamp(36px, 5vw, 76px); z-index: 1; display: flex; align-items: center; gap: 18px; margin: 0; color: rgba(246, 243, 234, .65); font-size: .62rem; letter-spacing: .25em; text-align: center; }
+.about__sparkline span { flex: 1; height: 1px; background: rgba(233, 173, 36, .65); }
 .about__copy { display: flex; flex-direction: column; justify-content: center; padding-left: clamp(42px, 7vw, 110px); padding-right: clamp(42px, 7vw, 110px); }
-.about h2 { color: var(--ivory); font-size: clamp(2.6rem, 4vw, 4.3rem); }
+.about__copy h2 { color: var(--ivory); font-size: clamp(2.6rem, 4vw, 4.3rem); }
 .about__copy > p:not(.eyebrow) { margin: 27px 0 0; color: rgba(246, 243, 234, .76); line-height: 1.75; }
 .about__copy strong { color: var(--ivory); }
 .about .text-link { margin-top: 35px; align-self: flex-start; }
@@ -189,7 +197,7 @@ section[id] { scroll-margin-top: 88px; }
   .hero h1 { font-size: clamp(3rem, 6vw, 4.8rem); }
   .solution-card { padding: 27px; }
   .about { grid-template-columns: 1fr; }
-  .about__visual { aspect-ratio: 16 / 9; width: 100%; min-height: 0; height: auto; max-height: none; }
+  .about__visual { width: 100%; min-height: 520px; height: auto; max-height: none; }
   .process-list { grid-template-columns: repeat(2, 1fr); }
   .process-list li:nth-child(2) { border-right: 0; }
   .process-list li { border-bottom: 1px solid var(--line); }
@@ -225,7 +233,11 @@ section[id] { scroll-margin-top: 88px; }
   .experience-card { min-height: 430px; }
   .solution-card { min-height: 390px; }
   .tool-line { align-items: flex-start; flex-direction: column; gap: 18px; }
-  .about__visual { min-height: 0; height: auto; }
+  .about__visual { min-height: 390px; height: auto; padding: 58px 22px 92px; }
+  .about__manifesto > p { margin-bottom: 22px; font-size: .62rem; }
+  .about__manifesto h2 { font-size: clamp(2.75rem, 12.5vw, 4.6rem); }
+  .about__manifesto > span { max-width: 320px; margin-top: 24px; font-size: .82rem; line-height: 1.6; }
+  .about__sparkline { right: 22px; bottom: 30px; left: 22px; gap: 10px; font-size: .52rem; letter-spacing: .16em; }
   .about__copy { padding: 80px 22px; }
   .process-list { grid-template-columns: 1fr; }
   .process-list li, .process-list li:nth-child(2) { min-height: auto; border-right: 0; }
@@ -238,7 +250,7 @@ section[id] { scroll-margin-top: 88px; }
   .hero__actions .button { width: 100%; }
   .portrait-caption { font-size: .62rem; }
   .need-tab { padding: 16px; font-size: .9rem; }
-  .about__visual { height: auto; }
+  .about__visual { min-height: 360px; height: auto; }
   .whatsapp-float { right: 14px; bottom: 14px; }
 }
 

@@ -484,7 +484,12 @@ export default function App() {
 
         <section className="about" id="sobre-mi" aria-labelledby="about-title">
           <div className="about__visual">
-            <img src="/images/montoyadigitalbond-wallpaper.webp" width="1600" height="900" alt="Identidad visual de MONTOYADIGITALBOND: Conecto ideas, transformo negocios" loading="lazy" />
+            <div className="about__manifesto">
+              <p>MONTOYADIGITALBOND</p>
+              <h2>Conecto ideas.<br /><em>Transformo negocios.</em></h2>
+              <span>Atención al cliente · Automatización · Integraciones</span>
+            </div>
+            <p className="about__sparkline"><span /> La chispa de la transformación digital <span /></p>
           </div>
           <div className="about__copy section">
             <p className="eyebrow">Sobre mí</p>
