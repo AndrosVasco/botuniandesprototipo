@@ -109,6 +109,65 @@ const hiring = [
   },
 ];
 
+const collaborations = [
+  {
+    name: "Vanti",
+    logo: "/logos/vanti.webp",
+    participation: "Implementación de mesa digital interna en Zendesk.",
+    contribution: "Centralización de solicitudes internas, seguimiento de casos y organización de la atención.",
+    url: "https://www.grupovanti.com/",
+  },
+  {
+    name: "+Costos",
+    logo: "/logos/mascostos.png",
+    participation: "Product Owner y desarrollador de la aplicación.",
+    contribution: "Conexión entre las necesidades del negocio, la evolución del producto y su implementación técnica.",
+    url: "https://www.mascostos.com/login",
+  },
+  {
+    name: "AppControl",
+    logo: "/logos/appcontrol.svg",
+    participation: "Integración de canales de WhatsApp con n8n.",
+    contribution: "Automatización de comunicaciones y conexión de conversaciones con procesos de la aplicación.",
+    url: "https://appcontrol.com.co/es/",
+  },
+  {
+    name: "MIC",
+    logo: "mic-group",
+    participation: "Mejora continua de flujos en Zendesk.",
+    contribution: "Organización y automatización de la gestión de solicitudes para facilitar el trabajo del equipo.",
+    url: "https://www.mic.com.co/",
+  },
+  {
+    name: "Vitals Foundation",
+    logo: "/logos/vitals-foundation.png",
+    participation: "Consultoría y apoyo en redes sociales, página web, eventos y voluntariado.",
+    contribution: "Tecnología y comunicación digital al servicio de una iniciativa con propósito social.",
+    url: "https://vitalsfoundation.org/",
+  },
+  {
+    name: "Beyond Travel",
+    logo: "/logos/beyond-travel.webp",
+    participation: "Consultoría e implementación de bot para WhatsApp.",
+    contribution: "Orientación sobre experiencias turísticas, captura de datos y continuidad de la atención con un asesor.",
+    url: "https://beyondtravel.com.co/",
+  },
+];
+
+function OrganizationLogo({ organization, lazy = false }: { organization: typeof collaborations[number]; lazy?: boolean }) {
+  if (organization.logo === "mic-group") {
+    return (
+      <span className="mic-logo" role="img" aria-label="MIC, Little MIC y Movies">
+        <img src="/logos/mic.webp" alt="" loading={lazy ? "lazy" : "eager"} />
+        <img src="/logos/little-mic.svg" alt="" loading={lazy ? "lazy" : "eager"} />
+        <img src="/logos/movies.webp" alt="" loading={lazy ? "lazy" : "eager"} />
+      </span>
+    );
+  }
+
+  return <img src={organization.logo} alt={`Logo de ${organization.name}`} loading={lazy ? "lazy" : "eager"} />;
+}
+
 export default function App() {
   const [activeNeed, setActiveNeed] = useState(needs[0]);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -167,6 +226,17 @@ export default function App() {
           </div>
         </section>
 
+        <section className="logo-strip" aria-labelledby="organizations-title">
+          <p id="organizations-title">Organizaciones con las que colaboro</p>
+          <div className="logo-strip__grid">
+            {collaborations.map((organization) => (
+              <a key={organization.name} href={organization.url} target="_blank" rel="noreferrer" aria-label={`Visitar el sitio de ${organization.name}`}>
+                <OrganizationLogo organization={organization} />
+              </a>
+            ))}
+          </div>
+        </section>
+
         <section className="needs section" aria-labelledby="needs-title">
           <div className="section-heading">
             <p className="eyebrow eyebrow--dark">Empecemos por tu reto</p>
@@ -219,6 +289,34 @@ export default function App() {
           <div className="tool-line">
             <span>Herramientas de trabajo</span>
             <ul aria-label="Herramientas"><li>Zendesk</li><li>WhatsApp API</li><li>n8n</li><li>APIs</li><li>IA cuando aporta valor</li></ul>
+          </div>
+        </section>
+
+        <section className="experience section" aria-labelledby="experience-title">
+          <div className="section-heading section-heading--split">
+            <div>
+              <p className="eyebrow eyebrow--dark">Experiencia profesional</p>
+              <h2 id="experience-title">Experiencia aplicada a proyectos reales</h2>
+            </div>
+            <p>Así aporto desde la consultoría, el desarrollo de producto y la implementación de soluciones digitales.</p>
+          </div>
+          <div className="experience-grid">
+            {collaborations.map((organization, index) => (
+              <article className="experience-card" key={organization.name}>
+                <div className="experience-card__head">
+                  <div className="experience-card__logo"><OrganizationLogo organization={organization} lazy /></div>
+                  <span>0{index + 1}</span>
+                </div>
+                <h3>{organization.name}</h3>
+                <dl>
+                  <div><dt>Participación</dt><dd>{organization.participation}</dd></div>
+                  <div><dt>Aporte</dt><dd>{organization.contribution}</dd></div>
+                </dl>
+                <a href={organization.url} target="_blank" rel="noreferrer" aria-label={`Visitar el sitio de ${organization.name}`}>
+                  Visitar sitio <ExternalLink size={15} />
+                </a>
+              </article>
+            ))}
           </div>
         </section>
 
