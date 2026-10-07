@@ -139,8 +139,8 @@ section[id] { scroll-margin-top: 88px; }
 .experience-testimonial__author span { color: var(--muted); }
 
 .about { display: grid; grid-template-columns: 1.05fr .95fr; min-height: 700px; background: var(--green); color: var(--ivory); }
-.about__visual { min-height: 520px; overflow: hidden; }
-.about__visual img { width: 100%; height: 100%; object-fit: cover; object-position: 66% center; }
+.about__visual { display: grid; place-items: center; min-width: 0; min-height: 520px; overflow: hidden; background: #061d18; }
+.about__visual img { display: block; width: 100%; height: 100%; object-fit: contain; object-position: center; }
 .about__copy { display: flex; flex-direction: column; justify-content: center; padding-left: clamp(42px, 7vw, 110px); padding-right: clamp(42px, 7vw, 110px); }
 .about h2 { color: var(--ivory); font-size: clamp(2.6rem, 4vw, 4.3rem); }
 .about__copy > p:not(.eyebrow) { margin: 27px 0 0; color: rgba(246, 243, 234, .76); line-height: 1.75; }
@@ -189,7 +189,7 @@ section[id] { scroll-margin-top: 88px; }
   .hero h1 { font-size: clamp(3rem, 6vw, 4.8rem); }
   .solution-card { padding: 27px; }
   .about { grid-template-columns: 1fr; }
-  .about__visual { height: 64vw; max-height: 670px; }
+  .about__visual { aspect-ratio: 16 / 9; width: 100%; min-height: 0; height: auto; max-height: none; }
   .process-list { grid-template-columns: repeat(2, 1fr); }
   .process-list li:nth-child(2) { border-right: 0; }
   .process-list li { border-bottom: 1px solid var(--line); }
@@ -225,7 +225,7 @@ section[id] { scroll-margin-top: 88px; }
   .experience-card { min-height: 430px; }
   .solution-card { min-height: 390px; }
   .tool-line { align-items: flex-start; flex-direction: column; gap: 18px; }
-  .about__visual { min-height: 390px; height: 70vw; }
+  .about__visual { min-height: 0; height: auto; }
   .about__copy { padding: 80px 22px; }
   .process-list { grid-template-columns: 1fr; }
   .process-list li, .process-list li:nth-child(2) { min-height: auto; border-right: 0; }
@@ -238,7 +238,7 @@ section[id] { scroll-margin-top: 88px; }
   .hero__actions .button { width: 100%; }
   .portrait-caption { font-size: .62rem; }
   .need-tab { padding: 16px; font-size: .9rem; }
-  .about__visual { height: 92vw; }
+  .about__visual { height: auto; }
   .whatsapp-float { right: 14px; bottom: 14px; }
 }
 
