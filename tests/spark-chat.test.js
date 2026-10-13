@@ -60,3 +60,17 @@ test("bloquea intentos de cambiar las instrucciones aunque mencionen automatizac
   assert.equal(response.body.questionCount, 0);
   assert.equal(response.body.proposal, null);
 });
+
+test("reconoce una situación operativa aunque no esté formulada como pregunta", async () => {
+  const response = await callChat({ message: "Todos los dias en el callcenter 4 auxiliares de enfermia llaman a confirmar citas medicas de control, en total 80 llamadas" });
+  assert.equal(response.status, 200);
+  assert.equal(response.body.action, "ask");
+  assert.equal(response.body.questionCount, 1);
+});
+
+test("acepta consultoría para digitalizar un proceso manual de cualquier área", async () => {
+  const response = await callChat({ message: "Llevo la contabilidad de mi negocio de manera manual, ¿cómo puedo mejorarlo?" });
+  assert.equal(response.status, 200);
+  assert.equal(response.body.action, "ask");
+  assert.equal(response.body.questionCount, 1);
+});

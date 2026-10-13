@@ -1,6 +1,7 @@
 const SPARK_PROFILE = {
   name: "Andrés Montoya Vélez",
   services: [
+    "Consultoría y mentoría para diagnosticar, priorizar y mejorar digitalmente procesos manuales de cualquier área del negocio, incluso cuando todavía no hay una herramienta definida",
     "Consultoría en experiencia del cliente y mejora de procesos",
     "Implementación y optimización de Zendesk: canales, clasificación, disparadores, SLA, reportes y operación",
     "Automatización con n8n: notificaciones, sincronización de datos, integración de APIs y eliminación de tareas manuales",
@@ -14,6 +15,7 @@ const SPARK_PROFILE = {
 // Configuración privada. Nunca se serializa en respuestas públicas ni tokens de sesión.
 const EFFORT_MATRIX = Object.freeze({
   discovery: { min: 4, max: 5 },
+  process_consulting: { min: 12, max: 15 },
   zendesk_setup: { min: 24, max: 30 },
   zendesk_optimization: { min: 12, max: 15 },
   n8n_automation: { min: 12, max: 15 },

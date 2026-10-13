@@ -37,6 +37,12 @@ test("mantiene la banda máxima en 25 por ciento para estimaciones combinadas", 
   assert.equal(estimate.investmentMax / estimate.investmentMin, 1.25);
 });
 
+test("estima consultoría de mejora digital aunque no haya herramienta definida", () => {
+  const estimate = estimateFromServiceKeys(["process_consulting"]);
+  assert.equal(estimate.investmentMin, 1920000);
+  assert.equal(estimate.investmentMax, 2400000);
+});
+
 test("rechaza un token de sesión manipulado", () => {
   const token = signState(newState());
   const [payload, signature] = token.split(".");

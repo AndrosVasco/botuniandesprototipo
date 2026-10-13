@@ -13,9 +13,17 @@ const RATE_WINDOW_MS = 10 * 60 * 1000;
 const RATE_LIMIT = 8;
 const rateWindows = new Map();
 
-const IN_SCOPE_PATTERN = /\b(atencion|clientes?|negocios?|empresas?|procesos?|operacion|ventas?|soporte|solicitudes?|tareas?|automat[a-z]*|chatbots?|bots?|whatsapp|zendesk|n8n|crm|apis?|integra[a-z]*|formularios?|datos?|equipos?|asesores?|canales?|seguimiento|flujos?|manual|repetitiv[a-z]*|productos?|servicios?|experiencia|paginas?|sitio web|aplicaciones?|apps?|herramientas?|transformacion digital)\b/i;
+const IN_SCOPE_PATTERN = /\b(atencion|clientes?|negocios?|empresas?|procesos?|operacion|ventas?|soporte|solicitudes?|tareas?|automat[a-z]*|chatbots?|bots?|whatsapp|zendesk|n8n|crm|apis?|integra[a-z]*|formularios?|datos?|equipos?|asesores?|canales?|seguimiento|flujos?|manual|repetitiv[a-z]*|productos?|servicios?|experiencia|paginas?|sitio web|aplicaciones?|apps?|herramientas?|transformacion digital|contabilidad|facturacion|cartera|inventario|nomina|compras|administracion|talento humano|recursos humanos|logistica|mentor[a-z]*|consultor[a-z]*)\b/i;
 const INJECTION_PATTERN = /(ignora|olvida|omite|desobedece).{0,35}(instrucciones|reglas|prompt)|((muestra|revela|imprime|repite).{0,35}(prompt|mensaje del sistema|instrucciones internas|configuracion|secreto|credencial))|jailbreak|modo desarrollador|developer message|system prompt|actua como (si no|otro)|simula que no tienes reglas/i;
 const OFF_TOPIC_PATTERN = /\b(receta|poema|cancion|cuento|novela|horoscopo|futbol|partido|presidente|capital de|tarea escolar|ensayo academico|traduce|traduccion|resumen de (un )?libro|resolver (esta )?ecuacion|chiste|rutina de ejercicio|dieta|diagnostico medico|consejo legal|pronostico del tiempo)\b/i;
+const OPERATIONAL_SIGNALS = [
+  /\b(call ?center|contact ?center|centro de contacto|mesa de ayuda)\b/i,
+  /\b(llamad[aos]*|citas?|pacientes?|usuarios?|casos?|tickets?|pedidos?|contactos?|mensajes?|correos?)\b/i,
+  /\b(diari[oa]s?|todos los dias|cada dia|semanal|mensual|frecuencia|turnos?)\b/i,
+  /\b\d+\b|\b(cantidad|volumen|much[oa]s?|varios?|cientos?|miles?)\b/i,
+  /\b(auxiliares?|agentes?|asesores?|empleados?|personas?|colaboradores?|enfermer[oa]s?|operadores?)\b/i,
+  /\b(confirm[a-z]*|agend[a-z]*|respond[a-z]*|registr[a-z]*|gestion[a-z]*|atend[a-z]*|contact[a-z]*|valid[a-z]*|asign[a-z]*|report[a-z]*)\b/i,
+];
 
 function normalized(value) {
   return sanitizeText(value).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
@@ -24,7 +32,8 @@ function normalized(value) {
 function isAllowedSparkMessage(message, hasBusinessContext = false) {
   const text = normalized(message);
   if (INJECTION_PATTERN.test(text) || OFF_TOPIC_PATTERN.test(text)) return false;
-  return hasBusinessContext || IN_SCOPE_PATTERN.test(text);
+  const operationalScore = OPERATIONAL_SIGNALS.reduce((score, pattern) => score + Number(pattern.test(text)), 0);
+  return hasBusinessContext || IN_SCOPE_PATTERN.test(text) || operationalScore >= 2;
 }
 
 function enforceLightRateLimit(req) {

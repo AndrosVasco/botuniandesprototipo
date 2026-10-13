@@ -220,9 +220,23 @@ export default function SparkAssistant() {
             {!proposal && (
               <form className="spark-composer" onSubmit={submitMessage}>
                 <label className="sr-only" htmlFor="spark-message">Mensaje para Spark</label>
-                <textarea id="spark-message" value={input} onChange={(event) => setInput(event.target.value)} maxLength={1500} rows={2} placeholder="Cuéntame tu reto…" disabled={loading} />
+                <textarea
+                  id="spark-message"
+                  value={input}
+                  onChange={(event) => setInput(event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing) {
+                      event.preventDefault();
+                      event.currentTarget.form?.requestSubmit();
+                    }
+                  }}
+                  maxLength={1500}
+                  rows={2}
+                  placeholder="Cuéntame tu reto…"
+                  disabled={loading}
+                />
                 <button type="submit" disabled={loading || !input.trim()} aria-label="Enviar mensaje"><Send /></button>
-                <small>{questionCount}/3 preguntas de aclaración · {input.length}/1500</small>
+                <small>Enter para enviar · Shift + Enter para nueva línea · {questionCount}/3 · {input.length}/1500</small>
               </form>
             )}
           </section>
