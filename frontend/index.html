@@ -1,6 +1,61 @@
 <!doctype html>
 <html lang="es">
   <head>
+    <!-- Google Tag Manager con consentimiento previo -->
+    <script>
+      (function (w, d, l, i) {
+        w[l] = w[l] || [];
+        function gtag() { w[l].push(arguments); }
+
+        gtag("consent", "default", {
+          ad_storage: "denied",
+          ad_user_data: "denied",
+          ad_personalization: "denied",
+          analytics_storage: "denied",
+          functionality_storage: "granted",
+          security_storage: "granted"
+        });
+
+        function loadTagManager() {
+          if (w.__montoyaGtmLoaded) return;
+          w.__montoyaGtmLoaded = true;
+          gtag("consent", "update", {
+            analytics_storage: "granted",
+            ad_storage: "denied",
+            ad_user_data: "denied",
+            ad_personalization: "denied"
+          });
+          var firstScript = d.getElementsByTagName("script")[0];
+          var tagManager = d.createElement("script");
+          tagManager.async = true;
+          tagManager.src = "https://www.googletagmanager.com/gtm.js?id=" + i;
+          firstScript.parentNode.insertBefore(tagManager, firstScript);
+          w[l].push({ "gtm.start": new Date().getTime(), event: "gtm.js" });
+        }
+
+        w.loadMontoyaTagManager = loadTagManager;
+
+        try {
+          if (w.localStorage.getItem("montoyadigitalbond-cookie-consent-v1") === "accepted") {
+            loadTagManager();
+          }
+        } catch (_) {}
+
+        w.addEventListener("montoyadigitalbond:cookie-consent", function (event) {
+          if (event.detail === "accepted") {
+            loadTagManager();
+          } else {
+            gtag("consent", "update", {
+              analytics_storage: "denied",
+              ad_storage: "denied",
+              ad_user_data: "denied",
+              ad_personalization: "denied"
+            });
+          }
+        });
+      })(window, document, "dataLayer", "GTM-W5W3TBCG");
+    </script>
+    <!-- End Google Tag Manager -->
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#0B2922" />

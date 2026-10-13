@@ -18,6 +18,7 @@ import "./styles.css";
 
 const WHATSAPP_BASE = "https://wa.me/573042206989";
 const LINKEDIN = "https://www.linkedin.com/in/andresmontoyavelez/";
+const COOKIE_CONSENT_KEY = "montoyadigitalbond-cookie-consent-v1";
 
 const whatsappUrl = (message: string) =>
   `${WHATSAPP_BASE}?text=${encodeURIComponent(message)}`;
@@ -27,6 +28,7 @@ const generalWhatsapp = whatsappUrl(
 );
 
 type Organization = {
+  id: string;
   name: string;
   logo: string;
   participation: string;
@@ -126,6 +128,7 @@ const hiring = [
 
 const collaborations: Organization[] = [
   {
+    id: "vanti",
     name: "Vanti",
     logo: "/logos/vanti.webp",
     participation: "Implementación de mesa digital interna en Zendesk.",
@@ -133,13 +136,20 @@ const collaborations: Organization[] = [
     url: "https://www.grupovanti.com/",
   },
   {
+    id: "mascostos",
     name: "+Costos",
     logo: "/logos/mascostos.png",
     participation: "Product Owner y desarrollador de la aplicación.",
     contribution: "Conexión entre las necesidades del negocio, la evolución del producto y su implementación técnica.",
+    testimonial: {
+      text: "Trabajar con Andrés en el desarrollo de +costos ha sido una experiencia muy positiva. Destaco especialmente su capacidad para entender lo que necesitamos, proponer soluciones y convertir ideas complejas en herramientas funcionales. Es un profesional comprometido, creativo y siempre dispuesto a encontrar alternativas para mejorar el producto. Ha sido un gran aliado en la evolución de nuestra plataforma.",
+      name: "Ana Milena Rangel Amado",
+      role: "Founder",
+    },
     url: "https://www.mascostos.com/login",
   },
   {
+    id: "appcontrol",
     name: "AppControl",
     logo: "/logos/appcontrol.svg",
     participation: "Integración de canales de WhatsApp con n8n.",
@@ -152,6 +162,7 @@ const collaborations: Organization[] = [
     url: "https://appcontrol.com.co/es/",
   },
   {
+    id: "mic",
     name: "MIC",
     logo: "mic-group",
     participation: "Mejora continua de flujos en Zendesk.",
@@ -164,13 +175,20 @@ const collaborations: Organization[] = [
     url: "https://www.mic.com.co/",
   },
   {
+    id: "vitals-foundation",
     name: "Vitals Foundation",
     logo: "/logos/vitals-foundation.png",
     participation: "Consultoría y apoyo en redes sociales, página web, eventos y voluntariado.",
     contribution: "Tecnología y comunicación digital al servicio de una iniciativa con propósito social.",
+    testimonial: {
+      text: "Consultoría para el desarrollo e implementación de estrategias digitales para canales de comunicación con el público objeto de la Fundación y para la desarrollo e implementación de proyectos en gestión del conocimiento, cooperación internacional, salud, gestión social y cultura.",
+      name: "Danilo De Alba De Moya",
+      role: "Director Ejecutivo",
+    },
     url: "https://vitalsfoundation.org/",
   },
   {
+    id: "beyond-travel",
     name: "Beyond Travel",
     logo: "/logos/beyond-travel.webp",
     participation: "Consultoría e implementación de bot para WhatsApp.",
@@ -187,13 +205,20 @@ const collaborations: Organization[] = [
 const experienceItems: Organization[] = [
   ...collaborations,
   {
+    id: "tigo-colombia",
     name: "Tigo Colombia",
     logo: "/logos/tigo.svg",
     participation: "Product Owner de bots y Zendesk durante 5 años.",
     contribution: "Liderazgo end-to-end de productos digitales y equipos multidisciplinarios, con foco en adopción, eficiencia y experiencia del cliente. Escalé el canal de 900 a 915.000 conversaciones mensuales y elevé la resolución de los bots del 33 % al 65 %.",
+    testimonial: {
+      text: "Andrés Felipe Montoya Es un profesional de alto nivel, con amplio dominio del ecosistema digital y una sólida capacidad para transformar la estrategia en resultados de negocio. Se destacó por su liderazgo, orientando al equipo hacia la consecución de objetivos mediante planes de acción estructurados, prioridades claras y responsabilidades alineadas con las metas organizacionales. Durante su gestión, impulsó significativamente el crecimiento del BOT de servicio al cliente, consolidándolo como un canal digital robusto, confiable y costo-eficiente, con un aporte tangible a la optimización de la operación y a la evolución del modelo de atención de la compañía. Su visión estratégica, capacidad de ejecución y liderazgo orientado a resultados lo convierten en un profesional de alto valor para cualquier organización.",
+      name: "Wilton David Girón Garzón",
+      role: "Especialista de automatización de canales",
+    },
     url: "https://www.tigo.com.co/",
   },
   {
+    id: "desarrollo-full-stack",
     name: "Background desarrollador full stack",
     logo: "full-stack",
     participation: "Desarrollador full stack durante 5 años.",
@@ -245,9 +270,25 @@ export default function App() {
   const [expandedTestimonials, setExpandedTestimonials] = useState<Record<string, boolean>>({});
   const [processVisible, setProcessVisible] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [cookieConsent, setCookieConsent] = useState<"accepted" | "rejected" | null>(null);
+  const [cookieConsentReady, setCookieConsentReady] = useState(false);
   const solutionRefs = useRef<(HTMLElement | null)[]>([]);
   const carouselRef = useRef<HTMLDivElement | null>(null);
   const processRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    try {
+      const savedConsent = window.localStorage.getItem(COOKIE_CONSENT_KEY);
+      if (savedConsent === "accepted" || savedConsent === "rejected") {
+        setCookieConsent(savedConsent);
+        document.documentElement.dataset.cookieConsent = savedConsent;
+      }
+    } catch {
+      // El sitio sigue funcionando aunque el navegador bloquee el almacenamiento local.
+    } finally {
+      setCookieConsentReady(true);
+    }
+  }, []);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -297,6 +338,17 @@ export default function App() {
   };
 
   const closeMenu = () => setMenuOpen(false);
+
+  const saveCookieConsent = (value: "accepted" | "rejected") => {
+    try {
+      window.localStorage.setItem(COOKIE_CONSENT_KEY, value);
+    } catch {
+      // Conserva la elección durante la sesión si el navegador bloquea el almacenamiento.
+    }
+    document.documentElement.dataset.cookieConsent = value;
+    window.dispatchEvent(new CustomEvent("montoyadigitalbond:cookie-consent", { detail: value }));
+    setCookieConsent(value);
+  };
 
   return (
     <div className="site-shell">
@@ -354,8 +406,13 @@ export default function App() {
         <section className="logo-strip" aria-labelledby="organizations-title">
           <p id="organizations-title">Organizaciones con las que colaboro</p>
           <div className="logo-strip__grid">
-            {collaborations.map((organization) => (
-              <a key={organization.name} href={organization.url} target="_blank" rel="noreferrer" aria-label={`Visitar el sitio de ${organization.name}`}>
+            {collaborations.map((organization, index) => (
+              <a
+                key={organization.name}
+                href={`#experiencia-${organization.id}`}
+                aria-label={`Ver experiencia con ${organization.name}`}
+                onClick={() => setCarouselPosition(index)}
+              >
                 <OrganizationLogo organization={organization} />
               </a>
             ))}
@@ -453,7 +510,12 @@ export default function App() {
             aria-label="Proyectos y organizaciones; usa las flechas izquierda y derecha para recorrer"
           >
             {experienceItems.map((organization, index) => (
-              <article className="experience-card" key={organization.name}>
+              <article
+                className="experience-card"
+                id={`experiencia-${organization.id}`}
+                aria-label={`Experiencia con ${organization.name}`}
+                key={organization.name}
+              >
                 <div className="experience-card__head">
                   <div className="experience-card__logo"><OrganizationLogo organization={organization} lazy /></div>
                   <span>0{index + 1}</span>
@@ -568,11 +630,32 @@ export default function App() {
 
       <footer className="footer">
         <div><a className="brand brand--footer" href="#inicio"><span>MONTOYA</span><strong>DIGITAL BOND</strong></a><p>La chispa de la transformación digital.</p></div>
-        <div className="footer__links"><a href={generalWhatsapp} target="_blank" rel="noreferrer">WhatsApp</a><a href={LINKEDIN} target="_blank" rel="noreferrer">LinkedIn</a></div>
+        <div className="footer__links">
+          <a href={generalWhatsapp} target="_blank" rel="noreferrer">WhatsApp</a>
+          <a href={LINKEDIN} target="_blank" rel="noreferrer">LinkedIn</a>
+          <a href="/legal.html">Términos y privacidad</a>
+          <button type="button" onClick={() => setCookieConsent(null)}>Preferencias de cookies</button>
+        </div>
         <p className="footer__copyright">© {new Date().getFullYear()} MONTOYADIGITALBOND.</p>
       </footer>
 
       <a className="whatsapp-float" href={generalWhatsapp} target="_blank" rel="noreferrer" aria-label="Hablar con Andrés por WhatsApp"><MessageCircle /><span>Hablemos</span></a>
+
+      {cookieConsentReady && cookieConsent === null && (
+        <aside className="cookie-banner" aria-label="Preferencias de cookies">
+          <div>
+            <strong>Tu privacidad importa</strong>
+            <p>
+              Usamos almacenamiento necesario para recordar tu elección. Si incorporamos medición como Google Analytics,
+              solo se activará con tu autorización. Consulta nuestra <a href="/legal.html#cookies">política de cookies y privacidad</a>.
+            </p>
+          </div>
+          <div className="cookie-banner__actions">
+            <button type="button" className="cookie-button cookie-button--secondary" onClick={() => saveCookieConsent("rejected")}>Rechazar</button>
+            <button type="button" className="cookie-button" onClick={() => saveCookieConsent("accepted")}>Aceptar</button>
+          </div>
+        </aside>
+      )}
     </div>
   );
 }
