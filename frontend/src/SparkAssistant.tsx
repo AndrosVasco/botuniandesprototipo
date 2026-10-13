@@ -50,7 +50,11 @@ export default function SparkAssistant() {
   const [leadLoading, setLeadLoading] = useState(false);
   const [leadError, setLeadError] = useState<string | null>(null);
   const [lead, setLead] = useState<LeadResponse | null>(null);
+  const [proposalReveal, setProposalReveal] = useState(false);
+  const conversation = useRef<HTMLDivElement | null>(null);
   const conversationEnd = useRef<HTMLDivElement | null>(null);
+  const proposalStart = useRef<HTMLDivElement | null>(null);
+  const proposalEffectTimer = useRef<number | null>(null);
   const sparkStarted = useRef(false);
   const proposalTracked = useRef(false);
 
@@ -72,8 +76,24 @@ export default function SparkAssistant() {
   }, [open]);
 
   useEffect(() => {
+    if (proposal && !showContact && !lead) return;
     conversationEnd.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }, [messages, proposal, loading, showContact, lead]);
+
+  useEffect(() => {
+    if (!proposal || !conversation.current || !proposalStart.current) return;
+    const frame = window.requestAnimationFrame(() => {
+      const container = conversation.current;
+      const anchor = proposalStart.current;
+      if (!container || !anchor) return;
+      container.scrollTo({ top: Math.max(0, anchor.offsetTop - container.offsetTop - 8), behavior: "smooth" });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [proposal]);
+
+  useEffect(() => () => {
+    if (proposalEffectTimer.current !== null) window.clearTimeout(proposalEffectTimer.current);
+  }, []);
 
   useEffect(() => {
     const openAssistant = (event: Event) => openDialog((event as CustomEvent<{ placement?: string }>).detail?.placement || "landing");
@@ -112,6 +132,12 @@ export default function SparkAssistant() {
       if (result.proposal && !proposalTracked.current) {
         proposalTracked.current = true;
         trackEvent("spark_proposal_view", { section_id: "spark", placement: "assistant", source: "spark" });
+        setProposalReveal(true);
+        if (proposalEffectTimer.current !== null) window.clearTimeout(proposalEffectTimer.current);
+        proposalEffectTimer.current = window.setTimeout(() => {
+          setProposalReveal(false);
+          proposalEffectTimer.current = null;
+        }, 1800);
       }
       setRetryMessage(null);
     } catch (requestError) {
@@ -131,6 +157,7 @@ export default function SparkAssistant() {
     if (!sessionToken || !authorization || leadLoading) return;
     setLeadLoading(true);
     setLeadError(null);
+    setProposalReveal(false);
     try {
       const response = await fetch("/api/spark/lead", {
         method: "POST",
@@ -184,7 +211,7 @@ export default function SparkAssistant() {
 
       {open && (
         <div className="spark-overlay" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setOpen(false); }}>
-          <section className="spark-assistant" role="dialog" aria-modal="true" aria-labelledby="spark-dialog-title">
+          <section className={proposalReveal ? "spark-assistant has-proposal-reveal" : "spark-assistant"} role="dialog" aria-modal="true" aria-labelledby="spark-dialog-title">
             <header className="spark-assistant__header">
               <div><span className="spark-assistant__mark"><Zap /></span><div><strong id="spark-dialog-title">Spark</strong><small>Orientación inicial con IA</small></div></div>
               <div className="spark-assistant__header-actions">
@@ -195,7 +222,7 @@ export default function SparkAssistant() {
 
             {mode === "demo" && <p className="spark-demo" role="status">Modo demostración: no usa OpenAI ni permite registrar prospectos.</p>}
 
-            <div className="spark-conversation" aria-live="polite">
+            <div className="spark-conversation" aria-live="polite" ref={conversation}>
               {messages.map((message, index) => <div className={`spark-message spark-message--${message.role}`} key={`${message.role}-${index}`}>{message.content}</div>)}
               {loading && <div className="spark-message spark-message--assistant spark-message--loading"><LoaderCircle className="spin" /> Spark está pensando…</div>}
 
@@ -206,7 +233,7 @@ export default function SparkAssistant() {
                 </div>
               )}
 
-              {proposal && <ProposalCard proposal={proposal} onInterest={() => { trackEvent("spark_interest", { section_id: "spark", placement: "assistant", source: "spark" }); setShowContact(true); }} />}
+              {proposal && <><div className="spark-proposal-anchor" ref={proposalStart} aria-hidden="true" /><ProposalCard proposal={proposal} onInterest={() => { trackEvent("spark_interest", { section_id: "spark", placement: "assistant", source: "spark" }); setShowContact(true); }} /></>}
 
               {showContact && proposal && !lead && (
                 <form className="spark-contact" onSubmit={submitLead}>
