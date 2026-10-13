@@ -426,7 +426,9 @@ export default function App() {
           </div>
         </section>
 
-        <section className="needs section" aria-labelledby="needs-title" data-analytics-section="needs" data-analytics-name="Needs" data-analytics-position="3">
+        <SparkAssistant />
+
+        <section className="needs section" aria-labelledby="needs-title" data-analytics-section="needs" data-analytics-name="Needs" data-analytics-position="4">
           <div className="section-heading needs__heading">
             <p className="eyebrow eyebrow--dark">Empecemos por tu reto</p>
             <h2 id="needs-title">¿Qué quieres mejorar?</h2>
@@ -458,7 +460,7 @@ export default function App() {
           </div>
         </section>
 
-        <section className="solutions section" id="soluciones" aria-labelledby="solutions-title" data-analytics-section="solutions" data-analytics-name="Solutions" data-analytics-position="4">
+        <section className="solutions section" id="soluciones" aria-labelledby="solutions-title" data-analytics-section="solutions" data-analytics-name="Solutions" data-analytics-position="5">
           <div className="section-heading section-heading--split">
             <div>
               <p className="eyebrow eyebrow--dark">Soluciones que aterrizan</p>
@@ -499,7 +501,7 @@ export default function App() {
           </div>
         </section>
 
-        <section className="experience section" id="experiencia" aria-labelledby="experience-title" data-analytics-section="experience" data-analytics-name="Experience" data-analytics-position="5">
+        <section className="experience section" id="experiencia" aria-labelledby="experience-title" data-analytics-section="experience" data-analytics-name="Experience" data-analytics-position="6">
           <div className="section-heading section-heading--split">
             <div>
               <p className="eyebrow eyebrow--dark">Experiencia profesional</p>
@@ -579,7 +581,7 @@ export default function App() {
           </div>
         </section>
 
-        <section className="about" id="sobre-mi" aria-labelledby="about-title" data-analytics-section="about" data-analytics-name="About" data-analytics-position="6">
+        <section className="about" id="sobre-mi" aria-labelledby="about-title" data-analytics-section="about" data-analytics-name="About" data-analytics-position="7">
           <div className="about__visual">
             <div className="about__manifesto">
               <p>MONTOYADIGITALBOND</p>
@@ -597,7 +599,7 @@ export default function App() {
           </div>
         </section>
 
-        <section ref={processRef} className={processVisible ? "process section is-visible" : "process section"} id="proceso" aria-labelledby="process-title" data-analytics-section="process" data-analytics-name="Process" data-analytics-position="7">
+        <section ref={processRef} className={processVisible ? "process section is-visible" : "process section"} id="proceso" aria-labelledby="process-title" data-analytics-section="process" data-analytics-name="Process" data-analytics-position="8">
           <div className="section-heading section-heading--split">
             <div><p className="eyebrow eyebrow--dark">Cómo trabajamos</p><h2 id="process-title">Un proceso claro,<br />de principio a fin.</h2></div>
             <p>Sin fórmulas genéricas: partimos de lo que ya tienes y de lo que realmente necesitas resolver.</p>
@@ -611,7 +613,7 @@ export default function App() {
           <p className="process-note"><Sparkles size={18} /> Durante el análisis inicial podemos avanzar con ajustes menores dentro de las horas acordadas.</p>
         </section>
 
-        <section className="hiring section" aria-labelledby="hiring-title" data-analytics-section="hiring" data-analytics-name="Hiring" data-analytics-position="8">
+        <section className="hiring section" aria-labelledby="hiring-title" data-analytics-section="hiring" data-analytics-name="Hiring" data-analytics-position="9">
           <div className="hiring__intro"><p className="eyebrow">A tu medida</p><h2 id="hiring-title">Formas de trabajar juntos</h2></div>
           <div className="hiring-selector">
             <div className="hiring-options" role="tablist" aria-label="Formas de contratación">
@@ -632,8 +634,6 @@ export default function App() {
             </div>
           </div>
         </section>
-
-        <SparkAssistant />
 
         <section className="closing section" data-analytics-section="closing" data-analytics-name="Closing" data-analytics-position="10">
           <div className="closing__spark" aria-hidden="true"><Sparkles /></div>

@@ -167,7 +167,7 @@ export default function SparkAssistant() {
 
   return (
     <>
-      <section className="spark-section section" id="spark" aria-labelledby="spark-title" data-analytics-section="spark" data-analytics-name="Spark" data-analytics-position="9">
+      <section className="spark-section section" id="spark" aria-labelledby="spark-title" data-analytics-section="spark" data-analytics-name="Spark" data-analytics-position="3">
         <div className="spark-section__orb" aria-hidden="true"><Zap /></div>
         <div className="spark-section__copy">
           <p className="eyebrow">Orientación inteligente</p>
