@@ -144,6 +144,11 @@ const collaborations: Organization[] = [
     logo: "/logos/appcontrol.svg",
     participation: "Integración de canales de WhatsApp con n8n.",
     contribution: "Automatización de comunicaciones y conexión de conversaciones con procesos de la aplicación.",
+    testimonial: {
+      text: "Trabajar con Andrés en AppControl ha sido una experiencia muy positiva. Destaco su capacidad para entender nuestras necesidades y llevarlas a soluciones prácticas, especialmente en la integración de WhatsApp y la automatización de flujos con n8n. Valoro su compromiso, disposición y claridad para explicar y resolver los retos técnicos. Su aporte nos ayuda a conectar la comunicación con nuestros procesos y facilitar el trabajo del equipo.",
+      name: "Julian Valenz",
+      role: "Founder",
+    },
     url: "https://appcontrol.com.co/es/",
   },
   {
@@ -170,6 +175,11 @@ const collaborations: Organization[] = [
     logo: "/logos/beyond-travel.webp",
     participation: "Consultoría e implementación de bot para WhatsApp.",
     contribution: "Orientación sobre experiencias turísticas, captura de datos y continuidad de la atención con un asesor.",
+    testimonial: {
+      text: "Con Andres hemos tenido un excelente acompañamiento para construir nuestro propio Agente Digital (BOT) que responda a nuestras necesidades y a las del cliente final. Su metodología para diagnosticar la necesidad, esquema de planeación y seguimiento, y además, entregables son un gran apoyo para facilitar el proyecto y enfocar sus entregables. Su conocimiento, experiencia y organización se notan para lograr un resultado que supera lo esperado, y algo que me gustó mucho es que él no tiene una simple vision de ingenieria digital, sino que tambien refleja su experiencia trabajando para temas comerciales; por lo que su visión siempre esta apalancada en encontrar el mejor camino para el cliente en sus desarrollos digitales.",
+      name: "Juan Camilo",
+      role: "Co-Founder",
+    },
     url: "https://beyondtravel.com.co/",
   },
 ];
@@ -232,6 +242,7 @@ export default function App() {
   const [activeSolution, setActiveSolution] = useState(0);
   const [activeHiring, setActiveHiring] = useState(0);
   const [carouselPosition, setCarouselPosition] = useState(0);
+  const [expandedTestimonials, setExpandedTestimonials] = useState<Record<string, boolean>>({});
   const [processVisible, setProcessVisible] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const solutionRefs = useRef<(HTMLElement | null)[]>([]);
@@ -454,7 +465,20 @@ export default function App() {
                 {organization.testimonial && (
                   <div className="experience-testimonial">
                     <span className="experience-testimonial__quote" aria-hidden="true">“</span>
-                    <blockquote>{organization.testimonial.text}</blockquote>
+                    <blockquote className={expandedTestimonials[organization.name] ? "is-expanded" : ""}>
+                      {organization.testimonial.text}
+                    </blockquote>
+                    <button
+                      className="experience-testimonial__toggle"
+                      type="button"
+                      aria-expanded={Boolean(expandedTestimonials[organization.name])}
+                      onClick={() => setExpandedTestimonials((current) => ({
+                        ...current,
+                        [organization.name]: !current[organization.name],
+                      }))}
+                    >
+                      {expandedTestimonials[organization.name] ? "Leer menos" : "Leer más"}
+                    </button>
                     <p className="experience-testimonial__author">
                       <strong>{organization.testimonial.name}</strong>
                       <span>{organization.testimonial.role}</span>
