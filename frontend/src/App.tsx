@@ -15,6 +15,7 @@ import {
   X,
 } from "lucide-react";
 import "./styles.css";
+import SparkAssistant from "./SparkAssistant";
 
 const WHATSAPP_BASE = "https://wa.me/573042206989";
 const LINKEDIN = "https://www.linkedin.com/in/andresmontoyavelez/";
@@ -618,6 +619,8 @@ export default function App() {
             </div>
           </div>
         </section>
+
+        <SparkAssistant />
 
         <section className="closing section">
           <div className="closing__spark" aria-hidden="true"><Sparkles /></div>
