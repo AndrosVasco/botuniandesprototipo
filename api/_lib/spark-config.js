@@ -13,15 +13,15 @@ const SPARK_PROFILE = {
 
 // Configuración privada. Nunca se serializa en respuestas públicas ni tokens de sesión.
 const EFFORT_MATRIX = Object.freeze({
-  discovery: { min: 4, max: 8 },
-  zendesk_setup: { min: 24, max: 60 },
-  zendesk_optimization: { min: 12, max: 32 },
-  n8n_automation: { min: 12, max: 40 },
-  whatsapp_bot: { min: 32, max: 80 },
-  ai_assistant: { min: 32, max: 96 },
-  internal_tool: { min: 40, max: 120 },
-  integration: { min: 16, max: 56 },
-  training_docs: { min: 8, max: 24 },
+  discovery: { min: 4, max: 5 },
+  zendesk_setup: { min: 24, max: 30 },
+  zendesk_optimization: { min: 12, max: 15 },
+  n8n_automation: { min: 12, max: 15 },
+  whatsapp_bot: { min: 32, max: 40 },
+  ai_assistant: { min: 32, max: 40 },
+  internal_tool: { min: 40, max: 50 },
+  integration: { min: 16, max: 20 },
+  training_docs: { min: 8, max: 10 },
 });
 
 const SERVICE_KEYS = Object.keys(EFFORT_MATRIX);

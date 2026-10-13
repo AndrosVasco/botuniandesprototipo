@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import {
-  ArrowDown,
   ArrowRight,
   Bot,
   Check,
@@ -13,9 +12,10 @@ import {
   Sparkles,
   Workflow,
   X,
+  Zap,
 } from "lucide-react";
 import "./styles.css";
-import SparkAssistant from "./SparkAssistant";
+import SparkAssistant, { openSparkAssistant } from "./SparkAssistant";
 
 const WHATSAPP_BASE = "https://wa.me/573042206989";
 const LINKEDIN = "https://www.linkedin.com/in/andresmontoyavelez/";
@@ -392,9 +392,11 @@ export default function App() {
             </p>
             <div className="hero__actions">
               <a className="button" href={generalWhatsapp} target="_blank" rel="noreferrer">
-                Cuéntame qué necesitas <MessageCircle size={18} />
+                Hablar por WhatsApp <MessageCircle size={18} />
               </a>
-              <a className="text-link" href="#soluciones">Explorar soluciones <ArrowDown size={17} /></a>
+              <button className="button button--outline" type="button" onClick={openSparkAssistant}>
+                Tengo un reto para Spark <Zap size={18} />
+              </button>
             </div>
           </div>
           <div className="hero__portrait reveal reveal--delay" aria-label="Retrato ilustrado de Andrés Montoya Vélez">
@@ -441,9 +443,12 @@ export default function App() {
               <span className="need-panel__index">0{needs.findIndex((need) => need.id === activeNeed.id) + 1}</span>
               <h3>{activeNeed.title}</h3>
               <p>{activeNeed.description}</p>
-              <a className="button button--dark" href={whatsappUrl(activeNeed.message)} target="_blank" rel="noreferrer">
-                Hablemos de esto <MessageCircle size={18} />
-              </a>
+              <div className="cta-pair">
+                <a className="button button--dark" href={whatsappUrl(activeNeed.message)} target="_blank" rel="noreferrer">
+                  Hablar por WhatsApp <MessageCircle size={18} />
+                </a>
+                <button className="button button--spark" type="button" onClick={openSparkAssistant}>Probar mi reto con Spark <Zap size={18} /></button>
+              </div>
             </div>
             <FlowGraphic variant={activeNeed.id} />
           </div>
@@ -613,9 +618,12 @@ export default function App() {
             </div>
             <div className="hiring-panel" role="tabpanel" id={`hiring-panel-${activeHiring}`} aria-labelledby={`hiring-tab-${activeHiring}`} key={activeHiring}>
               <p>{hiring[activeHiring].text}</p>
-              <a className="button" href={whatsappUrl(`Hola Andrés, vi MONTOYADIGITALBOND y quiero conversar sobre la modalidad de ${hiring[activeHiring].title.toLowerCase()}.`)} target="_blank" rel="noreferrer">
-                Conversemos sobre esta opción <MessageCircle size={18} />
-              </a>
+              <div className="cta-pair">
+                <a className="button" href={whatsappUrl(`Hola Andrés, vi MONTOYADIGITALBOND y quiero conversar sobre la modalidad de ${hiring[activeHiring].title.toLowerCase()}.`)} target="_blank" rel="noreferrer">
+                  Hablar por WhatsApp <MessageCircle size={18} />
+                </a>
+                <button className="button button--outline" type="button" onClick={openSparkAssistant}>Tengo un reto para Spark <Zap size={18} /></button>
+              </div>
             </div>
           </div>
         </section>
@@ -627,7 +635,10 @@ export default function App() {
           <p className="eyebrow">El siguiente paso</p>
           <h2>Tu próxima mejora puede empezar con una conversación.</h2>
           <p>Cuéntame qué quieres resolver y revisemos cómo puedo ayudarte.</p>
-          <a className="button" href={generalWhatsapp} target="_blank" rel="noreferrer">Hablemos por WhatsApp <MessageCircle size={18} /></a>
+          <div className="cta-pair cta-pair--center">
+            <a className="button" href={generalWhatsapp} target="_blank" rel="noreferrer">Hablar por WhatsApp <MessageCircle size={18} /></a>
+            <button className="button button--outline" type="button" onClick={openSparkAssistant}>Tengo un reto para Spark <Zap size={18} /></button>
+          </div>
         </section>
       </main>
 
@@ -642,7 +653,7 @@ export default function App() {
         <p className="footer__copyright">© {new Date().getFullYear()} MONTOYADIGITALBOND.</p>
       </footer>
 
-      <a className="whatsapp-float" href={generalWhatsapp} target="_blank" rel="noreferrer" aria-label="Hablar con Andrés por WhatsApp"><MessageCircle /><span>Hablemos</span></a>
+      <a className="whatsapp-float" href={generalWhatsapp} target="_blank" rel="noreferrer" aria-label="Hablar con Andrés por WhatsApp"><MessageCircle /><span>Hablar por WhatsApp</span></a>
 
       {cookieConsentReady && cookieConsent === null && (
         <aside className="cookie-banner" aria-label="Preferencias de cookies">

@@ -23,11 +23,18 @@ test("calcula la inversión en servidor sin publicar horas ni tarifa", () => {
     include_third_party_disclaimer: true,
   });
   assert.equal(result.proposal.investment.min, 1920000);
-  assert.equal(result.proposal.investment.max, 6400000);
+  assert.equal(result.proposal.investment.max, 2400000);
   const publicJson = JSON.stringify(result.proposal);
   assert.equal(/hour|hora|160000|serviceKeys|service_keys/i.test(publicJson), false);
   assert.equal(result.privateEstimate.hoursMin, 12);
-  assert.equal(result.privateEstimate.hoursMax, 40);
+  assert.equal(result.privateEstimate.hoursMax, 15);
+});
+
+test("mantiene la banda máxima en 25 por ciento para estimaciones combinadas", () => {
+  const estimate = estimateFromServiceKeys(["discovery", "zendesk_setup", "ai_assistant"]);
+  assert.equal(estimate.investmentMin, 9600000);
+  assert.equal(estimate.investmentMax, 12000000);
+  assert.equal(estimate.investmentMax / estimate.investmentMin, 1.25);
 });
 
 test("rechaza un token de sesión manipulado", () => {

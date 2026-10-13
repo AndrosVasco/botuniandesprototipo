@@ -9,6 +9,8 @@ const {
   sanitizeText,
   publicProposal,
   pricingQuestion,
+  isAllowedSparkMessage,
+  enforceLightRateLimit,
 } = require("../_lib/spark-core");
 const { callOpenAI, demoResponse } = require("../_lib/spark-openai");
 
@@ -25,6 +27,19 @@ module.exports = async function handler(req, res) {
     if (String(body.message || "").length > MAX_MESSAGE_LENGTH) return json(res, 400, { error: `El mensaje debe tener máximo ${MAX_MESSAGE_LENGTH} caracteres.` });
 
     const state = body.sessionToken ? verifyState(body.sessionToken) : newState();
+    const hasBusinessContext = state.messages.some((item) => item.role === "user");
+    if (!pricingQuestion(message) && !isAllowedSparkMessage(message, hasBusinessContext)) {
+      const reply = "Puedo ayudarte únicamente con retos de atención al cliente, procesos, automatización, integraciones y soluciones digitales para tu negocio. Cuéntame qué quieres mejorar en tu operación.";
+      return json(res, 200, {
+        mode: process.env.SPARK_DEMO_MODE === "true" ? "demo" : "live",
+        action: "message",
+        message: reply,
+        questionCount: state.questionCount,
+        maxQuestions: MAX_QUESTIONS,
+        sessionToken: signState(state),
+        proposal: null,
+      });
+    }
     if (state.proposal) return json(res, 409, { error: "Esta conversación ya tiene una propuesta. Puedes registrar tu interés o iniciar de nuevo." });
     if (state.messages.filter((item) => item.role === "user").length >= 4) return json(res, 429, { error: "Alcanzaste el límite de mensajes de esta orientación." });
 
@@ -44,9 +59,21 @@ module.exports = async function handler(req, res) {
       });
     }
 
+    enforceLightRateLimit(req);
+
     const demoMode = process.env.SPARK_DEMO_MODE === "true";
     let result = demoMode ? demoResponse(state) : await callOpenAI(state);
-    if (!result || !["ask", "propose"].includes(result.action)) throw Object.assign(new Error("Respuesta inválida."), { code: "OPENAI_ERROR" });
+    if (!result || !["ask", "propose", "decline"].includes(result.action)) throw Object.assign(new Error("Respuesta inválida."), { code: "OPENAI_ERROR" });
+
+    if (result.action === "decline") {
+      state.messages.pop();
+      const reply = "Ese tema está fuera del alcance de Spark. Puedo orientarte sobre atención al cliente, procesos, automatización, integraciones y soluciones digitales para tu negocio.";
+      return json(res, 200, {
+        mode: demoMode ? "demo" : "live", action: "message", message: reply,
+        questionCount: state.questionCount, maxQuestions: MAX_QUESTIONS,
+        sessionToken: signState(state), proposal: null,
+      });
+    }
 
     if (result.action === "ask" && state.questionCount < MAX_QUESTIONS) {
       const question = sanitizeText(result.question, 320);

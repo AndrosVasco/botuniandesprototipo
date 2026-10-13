@@ -24,6 +24,7 @@ type ChatResponse = {
 type LeadResponse = { status: "interest_sent"; reference: string; notification: "sent"; whatsappUrl: string };
 
 const INITIAL_MESSAGE = "¡Hola! Soy Spark ⚡ Cuéntame qué proceso te está quitando tiempo, qué problema quieres resolver o qué experiencia te gustaría mejorar.";
+export const openSparkAssistant = () => window.dispatchEvent(new Event("spark:open"));
 
 const formatCop = (value: number) => new Intl.NumberFormat("es-CO", {
   style: "currency",
@@ -65,6 +66,12 @@ export default function SparkAssistant() {
   useEffect(() => {
     conversationEnd.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }, [messages, proposal, loading, showContact, lead]);
+
+  useEffect(() => {
+    const openAssistant = () => setOpen(true);
+    window.addEventListener("spark:open", openAssistant);
+    return () => window.removeEventListener("spark:open", openAssistant);
+  }, []);
 
   const sendMessage = async (message: string, retry = false) => {
     const cleanMessage = message.trim();

@@ -9,6 +9,42 @@ const {
 const MAX_QUESTIONS = 3;
 const MAX_MESSAGE_LENGTH = 1500;
 const MAX_SESSION_AGE_MS = 2 * 60 * 60 * 1000;
+const RATE_WINDOW_MS = 10 * 60 * 1000;
+const RATE_LIMIT = 8;
+const rateWindows = new Map();
+
+const IN_SCOPE_PATTERN = /\b(atencion|clientes?|negocios?|empresas?|procesos?|operacion|ventas?|soporte|solicitudes?|tareas?|automat[a-z]*|chatbots?|bots?|whatsapp|zendesk|n8n|crm|apis?|integra[a-z]*|formularios?|datos?|equipos?|asesores?|canales?|seguimiento|flujos?|manual|repetitiv[a-z]*|productos?|servicios?|experiencia|paginas?|sitio web|aplicaciones?|apps?|herramientas?|transformacion digital)\b/i;
+const INJECTION_PATTERN = /(ignora|olvida|omite|desobedece).{0,35}(instrucciones|reglas|prompt)|((muestra|revela|imprime|repite).{0,35}(prompt|mensaje del sistema|instrucciones internas|configuracion|secreto|credencial))|jailbreak|modo desarrollador|developer message|system prompt|actua como (si no|otro)|simula que no tienes reglas/i;
+const OFF_TOPIC_PATTERN = /\b(receta|poema|cancion|cuento|novela|horoscopo|futbol|partido|presidente|capital de|tarea escolar|ensayo academico|traduce|traduccion|resumen de (un )?libro|resolver (esta )?ecuacion|chiste|rutina de ejercicio|dieta|diagnostico medico|consejo legal|pronostico del tiempo)\b/i;
+
+function normalized(value) {
+  return sanitizeText(value).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+}
+
+function isAllowedSparkMessage(message, hasBusinessContext = false) {
+  const text = normalized(message);
+  if (INJECTION_PATTERN.test(text) || OFF_TOPIC_PATTERN.test(text)) return false;
+  return hasBusinessContext || IN_SCOPE_PATTERN.test(text);
+}
+
+function enforceLightRateLimit(req) {
+  if (process.env.SPARK_DEMO_MODE === "true") return;
+  const forwarded = String(req.headers["x-forwarded-for"] || req.socket?.remoteAddress || "unknown").split(",")[0].trim();
+  const userAgent = String(req.headers["user-agent"] || "unknown").slice(0, 120);
+  const key = crypto.createHmac("sha256", sessionSecret()).update(`${forwarded}:${userAgent}`).digest("hex");
+  const now = Date.now();
+  const current = rateWindows.get(key);
+  const next = !current || current.startedAt <= now - RATE_WINDOW_MS
+    ? { startedAt: now, count: 1 }
+    : { startedAt: current.startedAt, count: current.count + 1 };
+  rateWindows.set(key, next);
+  if (rateWindows.size > 2000) {
+    for (const [storedKey, window] of rateWindows) {
+      if (window.startedAt <= now - RATE_WINDOW_MS) rateWindows.delete(storedKey);
+    }
+  }
+  if (next.count > RATE_LIMIT) throw Object.assign(new Error("Alcanzaste el límite temporal de orientaciones. Intenta nuevamente en unos minutos."), { status: 429 });
+}
 
 function json(res, status, body) {
   res.statusCode = status;
@@ -170,5 +206,7 @@ module.exports = {
   estimateFromServiceKeys,
   publicProposal,
   pricingQuestion,
+  isAllowedSparkMessage,
+  enforceLightRateLimit,
   whatsappUrl,
 };
