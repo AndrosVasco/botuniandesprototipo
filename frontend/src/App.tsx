@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import "./styles.css";
 import SparkAssistant, { openSparkAssistant } from "./SparkAssistant";
+import AnalyticsTracker from "./AnalyticsTracker";
 
 const WHATSAPP_BASE = "https://wa.me/573042206989";
 const LINKEDIN = "https://www.linkedin.com/in/andresmontoyavelez/";
@@ -353,9 +354,10 @@ export default function App() {
 
   return (
     <div className="site-shell">
-      <a className="skip-link" href="#contenido">Saltar al contenido</a>
+      <AnalyticsTracker />
+      <a className="skip-link" href="#contenido" data-track-kind="navigation" data-track-id="skip_to_content" data-track-target="content" data-track-placement="accessibility">Saltar al contenido</a>
       <header className="site-header">
-        <a className="brand" href="#inicio" aria-label="MONTOYADIGITALBOND, inicio">
+        <a className="brand" href="#inicio" aria-label="MONTOYADIGITALBOND, inicio" data-track-kind="navigation" data-track-id="header_brand" data-track-target="hero" data-track-placement="header">
           <span>MONTOYA</span>
           <strong>DIGITAL BOND</strong>
         </a>
@@ -365,23 +367,24 @@ export default function App() {
           aria-expanded={menuOpen}
           aria-controls="main-navigation"
           onClick={() => setMenuOpen((open) => !open)}
+          data-track-kind="button" data-track-section="header" data-track-id="mobile_menu_toggle" data-track-label="menu_toggle" data-track-action="view_details" data-track-placement="header"
         >
           <span className="sr-only">{menuOpen ? "Cerrar menú" : "Abrir menú"}</span>
           {menuOpen ? <X /> : <Menu />}
         </button>
         <nav id="main-navigation" className={menuOpen ? "nav is-open" : "nav"} aria-label="Navegación principal">
-          <a href="#soluciones" onClick={closeMenu}>Soluciones</a>
-          <a href="#experiencia" onClick={closeMenu}>Experiencia que respalda</a>
-          <a href="#sobre-mi" onClick={closeMenu}>Sobre mí</a>
-          <a href="#proceso" onClick={closeMenu}>Cómo trabajamos</a>
-          <a className="button button--small" href={generalWhatsapp} target="_blank" rel="noreferrer" onClick={closeMenu}>
+          <a href="#soluciones" onClick={closeMenu} data-track-kind="navigation" data-track-id="nav_solutions" data-track-target="solutions" data-track-placement={menuOpen ? "mobile_menu" : "header"}>Soluciones</a>
+          <a href="#experiencia" onClick={closeMenu} data-track-kind="navigation" data-track-id="nav_experience" data-track-target="experience" data-track-placement={menuOpen ? "mobile_menu" : "header"}>Experiencia que respalda</a>
+          <a href="#sobre-mi" onClick={closeMenu} data-track-kind="navigation" data-track-id="nav_about" data-track-target="about" data-track-placement={menuOpen ? "mobile_menu" : "header"}>Sobre mí</a>
+          <a href="#proceso" onClick={closeMenu} data-track-kind="navigation" data-track-id="nav_process" data-track-target="process" data-track-placement={menuOpen ? "mobile_menu" : "header"}>Cómo trabajamos</a>
+          <a className="button button--small" href={generalWhatsapp} target="_blank" rel="noreferrer" onClick={closeMenu} data-track-kind="button" data-track-section="header" data-track-id="header_whatsapp" data-track-label="talk" data-track-action="whatsapp" data-track-placement={menuOpen ? "mobile_menu" : "header"} data-track-source="landing">
             Hablemos <ArrowRight size={17} />
           </a>
         </nav>
       </header>
 
       <main id="contenido">
-        <section className="hero" id="inicio">
+        <section className="hero" id="inicio" data-analytics-section="hero" data-analytics-name="Hero" data-analytics-position="1">
           <div className="hero__spark hero__spark--one" aria-hidden="true" />
           <div className="hero__spark hero__spark--two" aria-hidden="true" />
           <div className="hero__copy reveal">
@@ -391,10 +394,10 @@ export default function App() {
               Te ayudo a organizar tu atención al cliente y simplificar tu operación con soluciones digitales adaptadas a tu negocio. Desde una mejora puntual hasta una implementación completa.
             </p>
             <div className="hero__actions">
-              <a className="button" href={generalWhatsapp} target="_blank" rel="noreferrer">
+              <a className="button" href={generalWhatsapp} target="_blank" rel="noreferrer" data-track-kind="button" data-track-section="hero" data-track-id="hero_whatsapp" data-track-label="talk_whatsapp" data-track-action="whatsapp" data-track-placement="hero" data-track-source="landing">
                 Hablar por WhatsApp <MessageCircle size={18} />
               </a>
-              <button className="button button--outline" type="button" onClick={openSparkAssistant}>
+              <button className="button button--outline" type="button" onClick={() => openSparkAssistant("hero")} data-track-kind="button" data-track-section="hero" data-track-id="hero_spark" data-track-label="challenge_spark" data-track-action="open_chat" data-track-placement="hero">
                 Tengo un reto para Spark <Zap size={18} />
               </button>
             </div>
@@ -406,7 +409,7 @@ export default function App() {
           </div>
         </section>
 
-        <section className="logo-strip" aria-labelledby="organizations-title">
+        <section className="logo-strip" aria-labelledby="organizations-title" data-analytics-section="organizations" data-analytics-name="Organizations" data-analytics-position="2">
           <p id="organizations-title">Organizaciones con las que colaboro</p>
           <div className="logo-strip__grid">
             {collaborations.map((organization, index) => (
@@ -415,6 +418,7 @@ export default function App() {
                 href={`#experiencia-${organization.id}`}
                 aria-label={`Ver experiencia con ${organization.name}`}
                 onClick={() => setCarouselPosition(index)}
+                data-track-kind="button" data-track-section="organizations" data-track-id={`organization_${organization.id}`} data-track-label="view_organization" data-track-action="view_details" data-track-placement="logo_strip"
               >
                 <OrganizationLogo organization={organization} />
               </a>
@@ -422,7 +426,7 @@ export default function App() {
           </div>
         </section>
 
-        <section className="needs section" aria-labelledby="needs-title">
+        <section className="needs section" aria-labelledby="needs-title" data-analytics-section="needs" data-analytics-name="Needs" data-analytics-position="3">
           <div className="section-heading needs__heading">
             <p className="eyebrow eyebrow--dark">Empecemos por tu reto</p>
             <h2 id="needs-title">¿Qué quieres mejorar?</h2>
@@ -432,7 +436,7 @@ export default function App() {
               const Icon = need.icon;
               const selected = activeNeed.id === need.id;
               return (
-                <button key={need.id} role="tab" aria-selected={selected} aria-controls={`panel-${need.id}`} id={`tab-${need.id}`} className={selected ? "need-tab is-active" : "need-tab"} onClick={() => setActiveNeed(need)}>
+                <button key={need.id} role="tab" aria-selected={selected} aria-controls={`panel-${need.id}`} id={`tab-${need.id}`} className={selected ? "need-tab is-active" : "need-tab"} onClick={() => setActiveNeed(need)} data-track-kind="button" data-track-section="needs" data-track-id={`need_${need.id}`} data-track-label="select_need" data-track-action="view_details" data-track-placement="needs_tabs">
                   <Icon size={18} />{need.label}
                 </button>
               );
@@ -444,17 +448,17 @@ export default function App() {
               <h3>{activeNeed.title}</h3>
               <p>{activeNeed.description}</p>
               <div className="cta-pair">
-                <a className="button button--dark" href={whatsappUrl(activeNeed.message)} target="_blank" rel="noreferrer">
+                <a className="button button--dark" href={whatsappUrl(activeNeed.message)} target="_blank" rel="noreferrer" data-track-kind="button" data-track-section="needs" data-track-id={`need_${activeNeed.id}_whatsapp`} data-track-label="talk_whatsapp" data-track-action="whatsapp" data-track-placement="need_panel" data-track-source="landing">
                   Hablar por WhatsApp <MessageCircle size={18} />
                 </a>
-                <button className="button button--spark" type="button" onClick={openSparkAssistant}>Probar mi reto con Spark <Zap size={18} /></button>
+                <button className="button button--spark" type="button" onClick={() => openSparkAssistant("need_panel")} data-track-kind="button" data-track-section="needs" data-track-id={`need_${activeNeed.id}_spark`} data-track-label="try_challenge" data-track-action="open_chat" data-track-placement="need_panel">Probar mi reto con Spark <Zap size={18} /></button>
               </div>
             </div>
             <FlowGraphic variant={activeNeed.id} />
           </div>
         </section>
 
-        <section className="solutions section" id="soluciones" aria-labelledby="solutions-title">
+        <section className="solutions section" id="soluciones" aria-labelledby="solutions-title" data-analytics-section="solutions" data-analytics-name="Solutions" data-analytics-position="4">
           <div className="section-heading section-heading--split">
             <div>
               <p className="eyebrow eyebrow--dark">Soluciones que aterrizan</p>
@@ -495,7 +499,7 @@ export default function App() {
           </div>
         </section>
 
-        <section className="experience section" id="experiencia" aria-labelledby="experience-title">
+        <section className="experience section" id="experiencia" aria-labelledby="experience-title" data-analytics-section="experience" data-analytics-name="Experience" data-analytics-position="5">
           <div className="section-heading section-heading--split">
             <div>
               <p className="eyebrow eyebrow--dark">Experiencia profesional</p>
@@ -544,6 +548,7 @@ export default function App() {
                         ...current,
                         [organization.name]: !current[organization.name],
                       }))}
+                      data-track-kind="button" data-track-section="experience" data-track-id={`testimonial_${organization.id}`} data-track-label="toggle_testimonial" data-track-action="view_details" data-track-placement="experience_card"
                     >
                       {expandedTestimonials[organization.name] ? "Leer menos" : "Leer más"}
                     </button>
@@ -554,7 +559,7 @@ export default function App() {
                   </div>
                 )}
                 {organization.url && (
-                  <a href={organization.url} target="_blank" rel="noreferrer" aria-label={`Visitar el sitio de ${organization.name}`}>
+                  <a href={organization.url} target="_blank" rel="noreferrer" aria-label={`Visitar el sitio de ${organization.name}`} data-track-kind="button" data-track-section="experience" data-track-id={`visit_${organization.id}`} data-track-label="visit_site" data-track-action="view_details" data-track-placement="experience_card">
                     Visitar sitio <ExternalLink size={15} />
                   </a>
                 )}
@@ -563,8 +568,8 @@ export default function App() {
           </div>
           <div className="carousel-controls">
             <div className="carousel-arrows">
-              <button type="button" onClick={() => moveCarousel(-1)} disabled={carouselPosition === 0} aria-label="Ver organización anterior"><ChevronLeft /></button>
-              <button type="button" onClick={() => moveCarousel(1)} disabled={carouselPosition === experienceItems.length - 1} aria-label="Ver experiencia siguiente"><ChevronRight /></button>
+              <button type="button" onClick={() => moveCarousel(-1)} disabled={carouselPosition === 0} aria-label="Ver organización anterior" data-track-kind="button" data-track-section="experience" data-track-id="experience_previous" data-track-label="previous" data-track-action="carousel_previous" data-track-placement="carousel_controls"><ChevronLeft /></button>
+              <button type="button" onClick={() => moveCarousel(1)} disabled={carouselPosition === experienceItems.length - 1} aria-label="Ver experiencia siguiente" data-track-kind="button" data-track-section="experience" data-track-id="experience_next" data-track-label="next" data-track-action="carousel_next" data-track-placement="carousel_controls"><ChevronRight /></button>
             </div>
             <div className="carousel-progress" aria-live="polite">
               <span>0{carouselPosition + 1}</span>
@@ -574,7 +579,7 @@ export default function App() {
           </div>
         </section>
 
-        <section className="about" id="sobre-mi" aria-labelledby="about-title">
+        <section className="about" id="sobre-mi" aria-labelledby="about-title" data-analytics-section="about" data-analytics-name="About" data-analytics-position="6">
           <div className="about__visual">
             <div className="about__manifesto">
               <p>MONTOYADIGITALBOND</p>
@@ -588,11 +593,11 @@ export default function App() {
             <h2 id="about-title">Tecnología con alguien que entiende tu operación.</h2>
             <p>Soy <strong>Andrés Montoya Vélez</strong>, consultor en experiencia del cliente y automatización digital. Mi trayectoria combina producto, procesos y tecnología para entender lo que necesita tu negocio y llevar las mejoras a la práctica.</p>
             <p>Te acompaño desde la definición del alcance hasta la implementación, las pruebas y la capacitación acordadas.</p>
-            <a className="text-link text-link--light" href={LINKEDIN} target="_blank" rel="noreferrer">Conoce mi trayectoria en LinkedIn <ExternalLink size={17} /></a>
+            <a className="text-link text-link--light" href={LINKEDIN} target="_blank" rel="noreferrer" data-track-kind="button" data-track-section="about" data-track-id="about_linkedin" data-track-label="linkedin_profile" data-track-action="view_details" data-track-placement="about">Conoce mi trayectoria en LinkedIn <ExternalLink size={17} /></a>
           </div>
         </section>
 
-        <section ref={processRef} className={processVisible ? "process section is-visible" : "process section"} id="proceso" aria-labelledby="process-title">
+        <section ref={processRef} className={processVisible ? "process section is-visible" : "process section"} id="proceso" aria-labelledby="process-title" data-analytics-section="process" data-analytics-name="Process" data-analytics-position="7">
           <div className="section-heading section-heading--split">
             <div><p className="eyebrow eyebrow--dark">Cómo trabajamos</p><h2 id="process-title">Un proceso claro,<br />de principio a fin.</h2></div>
             <p>Sin fórmulas genéricas: partimos de lo que ya tienes y de lo que realmente necesitas resolver.</p>
@@ -606,12 +611,12 @@ export default function App() {
           <p className="process-note"><Sparkles size={18} /> Durante el análisis inicial podemos avanzar con ajustes menores dentro de las horas acordadas.</p>
         </section>
 
-        <section className="hiring section" aria-labelledby="hiring-title">
+        <section className="hiring section" aria-labelledby="hiring-title" data-analytics-section="hiring" data-analytics-name="Hiring" data-analytics-position="8">
           <div className="hiring__intro"><p className="eyebrow">A tu medida</p><h2 id="hiring-title">Formas de trabajar juntos</h2></div>
           <div className="hiring-selector">
             <div className="hiring-options" role="tablist" aria-label="Formas de contratación">
               {hiring.map((item, index) => (
-                <button key={item.title} type="button" role="tab" aria-selected={activeHiring === index} aria-controls={`hiring-panel-${index}`} id={`hiring-tab-${index}`} className={activeHiring === index ? "is-active" : ""} onClick={() => setActiveHiring(index)}>
+                <button key={item.title} type="button" role="tab" aria-selected={activeHiring === index} aria-controls={`hiring-panel-${index}`} id={`hiring-tab-${index}`} className={activeHiring === index ? "is-active" : ""} onClick={() => setActiveHiring(index)} data-track-kind="button" data-track-section="hiring" data-track-id={`hiring_option_${index + 1}`} data-track-label="select_hiring" data-track-action="view_details" data-track-placement="hiring_tabs">
                   <span>0{index + 1}</span>{item.title}
                 </button>
               ))}
@@ -619,10 +624,10 @@ export default function App() {
             <div className="hiring-panel" role="tabpanel" id={`hiring-panel-${activeHiring}`} aria-labelledby={`hiring-tab-${activeHiring}`} key={activeHiring}>
               <p>{hiring[activeHiring].text}</p>
               <div className="cta-pair">
-                <a className="button" href={whatsappUrl(`Hola Andrés, vi MONTOYADIGITALBOND y quiero conversar sobre la modalidad de ${hiring[activeHiring].title.toLowerCase()}.`)} target="_blank" rel="noreferrer">
+                <a className="button" href={whatsappUrl(`Hola Andrés, vi MONTOYADIGITALBOND y quiero conversar sobre la modalidad de ${hiring[activeHiring].title.toLowerCase()}.`)} target="_blank" rel="noreferrer" data-track-kind="button" data-track-section="hiring" data-track-id={`hiring_${activeHiring + 1}_whatsapp`} data-track-label="talk_whatsapp" data-track-action="whatsapp" data-track-placement="hiring_panel" data-track-source="landing">
                   Hablar por WhatsApp <MessageCircle size={18} />
                 </a>
-                <button className="button button--outline" type="button" onClick={openSparkAssistant}>Tengo un reto para Spark <Zap size={18} /></button>
+                <button className="button button--outline" type="button" onClick={() => openSparkAssistant("hiring_panel")} data-track-kind="button" data-track-section="hiring" data-track-id={`hiring_${activeHiring + 1}_spark`} data-track-label="challenge_spark" data-track-action="open_chat" data-track-placement="hiring_panel">Tengo un reto para Spark <Zap size={18} /></button>
               </div>
             </div>
           </div>
@@ -630,30 +635,30 @@ export default function App() {
 
         <SparkAssistant />
 
-        <section className="closing section">
+        <section className="closing section" data-analytics-section="closing" data-analytics-name="Closing" data-analytics-position="10">
           <div className="closing__spark" aria-hidden="true"><Sparkles /></div>
           <p className="eyebrow">El siguiente paso</p>
           <h2>Tu próxima mejora puede empezar con una conversación.</h2>
           <p>Cuéntame qué quieres resolver y revisemos cómo puedo ayudarte.</p>
           <div className="cta-pair cta-pair--center">
-            <a className="button" href={generalWhatsapp} target="_blank" rel="noreferrer">Hablar por WhatsApp <MessageCircle size={18} /></a>
-            <button className="button button--outline" type="button" onClick={openSparkAssistant}>Tengo un reto para Spark <Zap size={18} /></button>
+            <a className="button" href={generalWhatsapp} target="_blank" rel="noreferrer" data-track-kind="button" data-track-section="closing" data-track-id="closing_whatsapp" data-track-label="talk_whatsapp" data-track-action="whatsapp" data-track-placement="closing" data-track-source="landing">Hablar por WhatsApp <MessageCircle size={18} /></a>
+            <button className="button button--outline" type="button" onClick={() => openSparkAssistant("closing")} data-track-kind="button" data-track-section="closing" data-track-id="closing_spark" data-track-label="challenge_spark" data-track-action="open_chat" data-track-placement="closing">Tengo un reto para Spark <Zap size={18} /></button>
           </div>
         </section>
       </main>
 
-      <footer className="footer">
-        <div><a className="brand brand--footer" href="#inicio"><span>MONTOYA</span><strong>DIGITAL BOND</strong></a><p>La chispa de la transformación digital.</p></div>
+      <footer className="footer" data-analytics-section="footer" data-analytics-name="Footer" data-analytics-position="11">
+        <div><a className="brand brand--footer" href="#inicio" data-track-kind="navigation" data-track-id="footer_brand" data-track-target="hero" data-track-placement="footer"><span>MONTOYA</span><strong>DIGITAL BOND</strong></a><p>La chispa de la transformación digital.</p></div>
         <div className="footer__links">
-          <a href={generalWhatsapp} target="_blank" rel="noreferrer">WhatsApp</a>
-          <a href={LINKEDIN} target="_blank" rel="noreferrer">LinkedIn</a>
-          <a href="/legal.html">Términos y privacidad</a>
-          <button type="button" onClick={() => setCookieConsent(null)}>Preferencias de cookies</button>
+          <a href={generalWhatsapp} target="_blank" rel="noreferrer" data-track-kind="button" data-track-section="footer" data-track-id="footer_whatsapp" data-track-label="whatsapp" data-track-action="whatsapp" data-track-placement="footer" data-track-source="landing">WhatsApp</a>
+          <a href={LINKEDIN} target="_blank" rel="noreferrer" data-track-kind="navigation" data-track-id="footer_linkedin" data-track-target="linkedin" data-track-placement="footer">LinkedIn</a>
+          <a href="/legal.html" data-track-kind="navigation" data-track-id="footer_legal" data-track-target="legal" data-track-placement="footer">Términos y privacidad</a>
+          <button type="button" onClick={() => setCookieConsent(null)} data-track-kind="button" data-track-section="footer" data-track-id="footer_cookie_preferences" data-track-label="cookie_preferences" data-track-action="view_details" data-track-placement="footer">Preferencias de cookies</button>
         </div>
         <p className="footer__copyright">© {new Date().getFullYear()} MONTOYADIGITALBOND.</p>
       </footer>
 
-      <a className="whatsapp-float" href={generalWhatsapp} target="_blank" rel="noreferrer" aria-label="Hablar con Andrés por WhatsApp"><MessageCircle /><span>Hablar por WhatsApp</span></a>
+      <a className="whatsapp-float" href={generalWhatsapp} target="_blank" rel="noreferrer" aria-label="Hablar con Andrés por WhatsApp" data-track-kind="button" data-track-section="global" data-track-id="floating_whatsapp" data-track-label="talk_whatsapp" data-track-action="whatsapp" data-track-placement="floating" data-track-source="landing"><MessageCircle /><span>Hablar por WhatsApp</span></a>
 
       {cookieConsentReady && cookieConsent === null && (
         <aside className="cookie-banner" aria-label="Preferencias de cookies">
@@ -665,8 +670,8 @@ export default function App() {
             </p>
           </div>
           <div className="cookie-banner__actions">
-            <button type="button" className="cookie-button cookie-button--secondary" onClick={() => saveCookieConsent("rejected")}>Rechazar</button>
-            <button type="button" className="cookie-button" onClick={() => saveCookieConsent("accepted")}>Aceptar</button>
+            <button type="button" className="cookie-button cookie-button--secondary" onClick={() => saveCookieConsent("rejected")} data-track-kind="button" data-track-section="consent" data-track-id="consent_reject" data-track-label="reject" data-track-action="consent" data-track-placement="cookie_banner">Rechazar</button>
+            <button type="button" className="cookie-button" onClick={() => saveCookieConsent("accepted")} data-track-kind="button" data-track-section="consent" data-track-id="consent_accept" data-track-label="accept" data-track-action="consent" data-track-placement="cookie_banner">Aceptar</button>
           </div>
         </aside>
       )}

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { ArrowRight, LoaderCircle, MessageCircle, RotateCcw, Send, Sparkles, X, Zap } from "lucide-react";
+import { trackEvent } from "./analytics";
 
 type ChatMessage = { role: "assistant" | "user"; content: string };
 type Proposal = {
@@ -24,7 +25,7 @@ type ChatResponse = {
 type LeadResponse = { status: "interest_sent"; reference: string; notification: "sent"; whatsappUrl: string };
 
 const INITIAL_MESSAGE = "¡Hola! Soy Spark ⚡ Cuéntame qué proceso te está quitando tiempo, qué problema quieres resolver o qué experiencia te gustaría mejorar.";
-export const openSparkAssistant = () => window.dispatchEvent(new Event("spark:open"));
+export const openSparkAssistant = (placement = "landing") => window.dispatchEvent(new CustomEvent("spark:open", { detail: { placement } }));
 
 const formatCop = (value: number) => new Intl.NumberFormat("es-CO", {
   style: "currency",
@@ -50,6 +51,13 @@ export default function SparkAssistant() {
   const [leadError, setLeadError] = useState<string | null>(null);
   const [lead, setLead] = useState<LeadResponse | null>(null);
   const conversationEnd = useRef<HTMLDivElement | null>(null);
+  const sparkStarted = useRef(false);
+  const proposalTracked = useRef(false);
+
+  const openDialog = (placement: string) => setOpen((current) => {
+    if (!current) trackEvent("spark_open", { section_id: "spark", placement, source: "spark" });
+    return true;
+  });
 
   useEffect(() => {
     if (!open) return;
@@ -68,7 +76,7 @@ export default function SparkAssistant() {
   }, [messages, proposal, loading, showContact, lead]);
 
   useEffect(() => {
-    const openAssistant = () => setOpen(true);
+    const openAssistant = (event: Event) => openDialog((event as CustomEvent<{ placement?: string }>).detail?.placement || "landing");
     window.addEventListener("spark:open", openAssistant);
     return () => window.removeEventListener("spark:open", openAssistant);
   }, []);
@@ -76,6 +84,10 @@ export default function SparkAssistant() {
   const sendMessage = async (message: string, retry = false) => {
     const cleanMessage = message.trim();
     if (!cleanMessage || loading || proposal) return;
+    if (!retry && !sparkStarted.current) {
+      sparkStarted.current = true;
+      trackEvent("spark_start", { section_id: "spark", placement: "assistant", source: "spark" });
+    }
     setLoading(true);
     setError(null);
     if (!retry) {
@@ -97,6 +109,10 @@ export default function SparkAssistant() {
       setMode(result.mode);
       setMessages((current) => [...current, { role: "assistant", content: result.message }]);
       setProposal(result.proposal);
+      if (result.proposal && !proposalTracked.current) {
+        proposalTracked.current = true;
+        trackEvent("spark_proposal_view", { section_id: "spark", placement: "assistant", source: "spark" });
+      }
       setRetryMessage(null);
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : "Spark no pudo responder.");
@@ -124,6 +140,7 @@ export default function SparkAssistant() {
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "No fue posible registrar tu interés.");
       setLead(data as LeadResponse);
+      trackEvent("generate_lead", { section_id: "spark", source: "spark" });
     } catch (requestError) {
       setLeadError(requestError instanceof Error ? requestError.message : "No fue posible registrar tu interés.");
     } finally {
@@ -144,22 +161,24 @@ export default function SparkAssistant() {
     setAuthorization(false);
     setLead(null);
     setLeadError(null);
+    sparkStarted.current = false;
+    proposalTracked.current = false;
   };
 
   return (
     <>
-      <section className="spark-section section" id="spark" aria-labelledby="spark-title">
+      <section className="spark-section section" id="spark" aria-labelledby="spark-title" data-analytics-section="spark" data-analytics-name="Spark" data-analytics-position="9">
         <div className="spark-section__orb" aria-hidden="true"><Zap /></div>
         <div className="spark-section__copy">
           <p className="eyebrow">Orientación inteligente</p>
           <h2 id="spark-title">Soy Spark. Atrévete a ponerme a prueba. <span aria-hidden="true">⚡</span></h2>
           <p>Andrés convirtió parte de su experiencia en instrucciones para este asistente con inteligencia artificial. Cuéntame qué quieres mejorar y, con hasta tres preguntas, te propondré una solución inicial con herramientas e inversión estimada.</p>
-          <button className="button" type="button" onClick={() => setOpen(true)}>Tengo un reto para Spark <ArrowRight size={18} /></button>
+          <button className="button" type="button" onClick={() => openDialog("spark_section")} data-track-kind="button" data-track-section="spark" data-track-id="spark_section_open" data-track-label="challenge_spark" data-track-action="open_chat" data-track-placement="spark_section">Tengo un reto para Spark <ArrowRight size={18} /></button>
           <small><Sparkles size={15} /> Orientación inicial con IA. Alcance y valores pendientes de confirmación por Andrés.</small>
         </div>
       </section>
 
-      <button className="spark-float" type="button" onClick={() => setOpen(true)} aria-label="Abrir asistente Spark">
+      <button className="spark-float" type="button" onClick={() => openDialog("floating")} aria-label="Abrir asistente Spark" data-track-kind="button" data-track-section="global" data-track-id="spark_floating_open" data-track-label="try_spark" data-track-action="open_chat" data-track-placement="floating">
         <Zap /><span>Probar Spark</span>
       </button>
 
@@ -169,8 +188,8 @@ export default function SparkAssistant() {
             <header className="spark-assistant__header">
               <div><span className="spark-assistant__mark"><Zap /></span><div><strong id="spark-dialog-title">Spark</strong><small>Orientación inicial con IA</small></div></div>
               <div className="spark-assistant__header-actions">
-                <button type="button" onClick={resetConversation} aria-label="Iniciar una nueva conversación"><RotateCcw /></button>
-                <button type="button" onClick={() => setOpen(false)} aria-label="Cerrar Spark"><X /></button>
+                <button type="button" onClick={resetConversation} aria-label="Iniciar una nueva conversación" data-track-kind="button" data-track-section="spark" data-track-id="spark_reset" data-track-label="reset_conversation" data-track-action="view_details" data-track-placement="assistant_header"><RotateCcw /></button>
+                <button type="button" onClick={() => setOpen(false)} aria-label="Cerrar Spark" data-track-kind="button" data-track-section="spark" data-track-id="spark_close" data-track-label="close" data-track-action="view_details" data-track-placement="assistant_header"><X /></button>
               </div>
             </header>
 
@@ -183,11 +202,11 @@ export default function SparkAssistant() {
               {error && (
                 <div className="spark-error" role="alert">
                   <p>{error}</p>
-                  <div>{retryMessage && <button type="button" onClick={() => void sendMessage(retryMessage, true)}>Reintentar</button>}<a href="https://wa.me/573042206989" target="_blank" rel="noreferrer">Hablar con Andrés</a></div>
+                  <div>{retryMessage && <button type="button" onClick={() => void sendMessage(retryMessage, true)} data-track-kind="button" data-track-section="spark" data-track-id="spark_retry" data-track-label="retry" data-track-action="submit_form" data-track-placement="assistant_error">Reintentar</button>}<a href="https://wa.me/573042206989" target="_blank" rel="noreferrer" data-track-kind="button" data-track-section="spark" data-track-id="spark_error_whatsapp" data-track-label="talk_whatsapp" data-track-action="whatsapp" data-track-placement="assistant_error" data-track-source="spark">Hablar con Andrés</a></div>
                 </div>
               )}
 
-              {proposal && <ProposalCard proposal={proposal} onInterest={() => setShowContact(true)} />}
+              {proposal && <ProposalCard proposal={proposal} onInterest={() => { trackEvent("spark_interest", { section_id: "spark", placement: "assistant", source: "spark" }); setShowContact(true); }} />}
 
               {showContact && proposal && !lead && (
                 <form className="spark-contact" onSubmit={submitLead}>
@@ -201,7 +220,7 @@ export default function SparkAssistant() {
                   <p className="spark-contact__hint">Escribe al menos WhatsApp o correo.</p>
                   <label className="spark-consent"><input type="checkbox" checked={authorization} onChange={(event) => setAuthorization(event.target.checked)} required /><span>Autorizo compartir mis datos y esta conversación con Andrés para revisar mi solicitud y contactarme.</span></label>
                   {leadError && <p className="spark-contact__error" role="alert">{leadError}</p>}
-                  <button className="button button--dark" type="submit" disabled={leadLoading || !authorization || (!contact.whatsapp.trim() && !contact.email.trim())}>{leadLoading ? <><LoaderCircle className="spin" /> Registrando…</> : "Registrar mi interés"}</button>
+                  <button className="button button--dark" type="submit" disabled={leadLoading || !authorization || (!contact.whatsapp.trim() && !contact.email.trim())} data-track-kind="button" data-track-section="spark" data-track-id="spark_submit_interest" data-track-label="submit_interest" data-track-action="submit_form" data-track-placement="assistant">{leadLoading ? <><LoaderCircle className="spin" /> Registrando…</> : "Registrar mi interés"}</button>
                 </form>
               )}
 
@@ -210,7 +229,7 @@ export default function SparkAssistant() {
                   <Sparkles />
                   <h3>Interés registrado</h3>
                   <p>Referencia <strong>{lead.reference}</strong>. La notificación fue enviada.</p>
-                  <a className="button button--dark" href={lead.whatsappUrl} target="_blank" rel="noreferrer">Continuar en WhatsApp <MessageCircle size={18} /></a>
+                  <a className="button button--dark" href={lead.whatsappUrl} target="_blank" rel="noreferrer" data-track-kind="button" data-track-section="spark" data-track-id="spark_success_whatsapp" data-track-label="continue_whatsapp" data-track-action="whatsapp" data-track-placement="assistant_success" data-track-source="spark">Continuar en WhatsApp <MessageCircle size={18} /></a>
                   <small>WhatsApp se abrirá con un mensaje preparado; tú decides si lo envías.</small>
                 </div>
               )}
@@ -235,7 +254,7 @@ export default function SparkAssistant() {
                   placeholder="Cuéntame tu reto…"
                   disabled={loading}
                 />
-                <button type="submit" disabled={loading || !input.trim()} aria-label="Enviar mensaje"><Send /></button>
+                <button type="submit" disabled={loading || !input.trim()} aria-label="Enviar mensaje" data-track-kind="button" data-track-section="spark" data-track-id="spark_send_message" data-track-label="send_message" data-track-action="submit_form" data-track-placement="assistant"><Send /></button>
                 <small>Enter para enviar · Shift + Enter para nueva línea · {questionCount}/3 · {input.length}/1500</small>
               </form>
             )}
@@ -265,7 +284,7 @@ function ProposalCard({ proposal, onInterest }: { proposal: Proposal; onInterest
         <small>{proposal.notice}</small>
         {proposal.thirdPartyNotice && <small>{proposal.thirdPartyNotice}</small>}
       </div>
-      <button className="button button--dark" type="button" onClick={onInterest}>Me interesa, hablar con Andrés <ArrowRight size={18} /></button>
+      <button className="button button--dark" type="button" onClick={onInterest} data-track-kind="button" data-track-section="spark" data-track-id="spark_interest" data-track-label="interested" data-track-action="view_details" data-track-placement="proposal">Me interesa, hablar con Andrés <ArrowRight size={18} /></button>
     </article>
   );
 }

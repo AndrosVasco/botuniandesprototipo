@@ -70,6 +70,8 @@ El archivo `vercel.json` conserva el despliegue desde la raíz del repositorio, 
 
 Las credenciales de OpenAI y SMTP deben configurarse únicamente como variables cifradas del proyecto en Vercel. Ninguna utiliza el prefijo `VITE_` y ninguna se entrega al navegador.
 
+La implementación y configuración manual pendiente de GA4/GTM se documentan en [docs/analytics-ga4.md](docs/analytics-ga4.md).
+
 ## Recursos visuales
 
 Las imágenes originales entregadas se conservan en `frontend/public/images` y sus versiones WebP optimizadas son las que usa la landing. La imagen social está preparada a 1200 × 630 px.
