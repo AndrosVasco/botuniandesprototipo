@@ -43,6 +43,23 @@ test("estima consultoría de mejora digital aunque no haya herramienta definida"
   assert.equal(estimate.investmentMax, 2400000);
 });
 
+test("publica capacidades genéricas y un MVP sin nombres de plataformas", () => {
+  const result = publicProposal({
+    problem: "Atención manual en Zendesk y WhatsApp",
+    solution: "Conectar Zendesk con n8n y OpenAI",
+    tools: [{ name: "Zendesk + n8n", purpose: "Automatizar WhatsApp con OpenAI" }],
+    scope: ["Configurar Zendesk"],
+    assumptions: ["El cliente ya usa Vercel y Supabase"],
+    service_keys: ["zendesk_optimization", "n8n_automation"],
+    include_third_party_disclaimer: true,
+  });
+  const publicJson = JSON.stringify(result.proposal);
+  assert.equal(/zendesk|n8n|whatsapp|openai|vercel|supabase/i.test(publicJson), false);
+  assert.ok(result.proposal.scope.includes("Producto mínimo viable costo-eficiente"));
+  assert.ok(result.proposal.scope.includes("Calibración y pruebas"));
+  assert.ok(result.proposal.scope.includes("Capacitación y monitoreo inicial"));
+});
+
 test("rechaza un token de sesión manipulado", () => {
   const token = signState(newState());
   const [payload, signature] = token.split(".");

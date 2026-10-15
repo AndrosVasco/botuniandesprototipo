@@ -125,6 +125,18 @@ function sanitizeText(value, max = MAX_MESSAGE_LENGTH) {
   return String(value || "").replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, "").trim().slice(0, max);
 }
 
+function genericizePublicText(value) {
+  return sanitizeText(value, 900)
+    .replace(/zendesk|freshdesk|intercom/gi, "software de gestión de solicitudes")
+    .replace(/salesforce|hubspot/gi, "software de gestión comercial")
+    .replace(/\bn8n\b|zapier|make\.com/gi, "automatización low-code")
+    .replace(/whatsapp(?:\s+cloud\s+api)?|twilio/gi, "canal de mensajería empresarial")
+    .replace(/openai|chatgpt/gi, "servicio de inteligencia artificial")
+    .replace(/\breact\b/gi, "interfaz web")
+    .replace(/\bvercel\b|\baws\b|amazon web services/gi, "hosting administrado")
+    .replace(/supabase|postgres(?:ql)?/gi, "base de datos administrada");
+}
+
 function estimateFromServiceKeys(keys) {
   const unique = [...new Set((Array.isArray(keys) ? keys : []).filter((key) => SERVICE_KEYS.includes(key)))].slice(0, 3);
   if (!unique.length) return { serviceKeys: [], hoursMin: null, hoursMax: null, investmentMin: null, investmentMax: null };
@@ -146,15 +158,18 @@ function estimateFromServiceKeys(keys) {
 function publicProposal(modelProposal) {
   const estimate = estimateFromServiceKeys(modelProposal.service_keys);
   const tools = Array.isArray(modelProposal.tools) ? modelProposal.tools.slice(0, 5).map((tool) => ({
-    name: sanitizeText(tool.name, 60),
-    purpose: sanitizeText(tool.purpose, 180),
+    name: sanitizeText(genericizePublicText(tool.name), 60),
+    purpose: sanitizeText(genericizePublicText(tool.purpose), 180),
   })).filter((tool) => tool.name && tool.purpose) : [];
+  const modelScope = (Array.isArray(modelProposal.scope) ? modelProposal.scope : []).map((item) => genericizePublicText(item)).filter(Boolean);
+  const requiredScope = ["Producto mínimo viable costo-eficiente", "Calibración y pruebas", "Capacitación y monitoreo inicial"];
+  const scope = [...new Set([...requiredScope, ...modelScope])].slice(0, 6);
   const proposal = {
-    problem: sanitizeText(modelProposal.problem, 500),
-    solution: sanitizeText(modelProposal.solution, 700),
+    problem: sanitizeText(genericizePublicText(modelProposal.problem), 500),
+    solution: sanitizeText(genericizePublicText(modelProposal.solution), 700),
     tools,
-    scope: (Array.isArray(modelProposal.scope) ? modelProposal.scope : []).slice(0, 6).map((item) => sanitizeText(item, 220)).filter(Boolean),
-    assumptions: (Array.isArray(modelProposal.assumptions) ? modelProposal.assumptions : []).slice(0, 6).map((item) => sanitizeText(item, 220)).filter(Boolean),
+    scope,
+    assumptions: (Array.isArray(modelProposal.assumptions) ? modelProposal.assumptions : []).slice(0, 6).map((item) => sanitizeText(genericizePublicText(item), 220)).filter(Boolean),
     investment: estimate.investmentMin === null ? {
       status: "pending",
       label: "Inversión pendiente de evaluación",
@@ -212,6 +227,7 @@ module.exports = {
   verifyState,
   newState,
   sanitizeText,
+  genericizePublicText,
   estimateFromServiceKeys,
   publicProposal,
   pricingQuestion,

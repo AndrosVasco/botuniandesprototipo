@@ -7,6 +7,7 @@ const {
   verifyState,
   newState,
   sanitizeText,
+  genericizePublicText,
   publicProposal,
   pricingQuestion,
   isAllowedSparkMessage,
@@ -76,7 +77,7 @@ module.exports = async function handler(req, res) {
     }
 
     if (result.action === "ask" && state.questionCount < MAX_QUESTIONS) {
-      const question = sanitizeText(result.question, 320);
+      const question = sanitizeText(genericizePublicText(result.question), 320);
       if (!question) throw Object.assign(new Error("Pregunta inválida."), { code: "OPENAI_ERROR" });
       state.questionCount += 1;
       state.messages.push({ role: "assistant", content: question });

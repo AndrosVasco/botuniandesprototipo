@@ -3,12 +3,12 @@ const SPARK_PROFILE = {
   services: [
     "Consultoría y mentoría para diagnosticar, priorizar y mejorar digitalmente procesos manuales de cualquier área del negocio, incluso cuando todavía no hay una herramienta definida",
     "Consultoría en experiencia del cliente y mejora de procesos",
-    "Implementación y optimización de Zendesk: canales, clasificación, disparadores, SLA, reportes y operación",
-    "Automatización con n8n: notificaciones, sincronización de datos, integración de APIs y eliminación de tareas manuales",
-    "WhatsApp Cloud API: atención guiada, menús, captura de leads, conexión con asesores y flujos conversacionales",
+    "Implementación y optimización de software de gestión de solicitudes: canales, clasificación, reglas, niveles de servicio, reportes y operación",
+    "Automatización low-code: notificaciones, sincronización de datos, integración de APIs y eliminación de tareas manuales",
+    "Canales de mensajería empresarial: atención guiada, captura de datos y flujos conversacionales automatizados",
     "Asistentes con IA cuando aporten valor al problema",
-    "Formularios, herramientas internas e integraciones con React, Vercel y Supabase cuando sean pertinentes",
-    "Levantamiento, priorización, capacitación y documentación",
+    "Formularios, herramientas internas, integraciones, interfaces web, hosting y bases de datos administradas cuando sean pertinentes",
+    "Levantamiento, priorización, producto mínimo viable, calibración, capacitación, monitoreo y documentación",
   ],
 };
 
